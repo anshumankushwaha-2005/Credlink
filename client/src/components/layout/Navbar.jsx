@@ -41,7 +41,7 @@ export default function Navbar({ title }) {
           >
             {languagesList.map((lang) => (
               <option key={lang.code} value={lang.code} className="text-slate-700 bg-white text-xs">
-                {lang.name}
+                {lang.code === 'hinglish' ? 'Hinglish' : lang.name.split(' ')[0]}
               </option>
             ))}
           </select>

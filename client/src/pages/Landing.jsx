@@ -228,35 +228,35 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-[#FCFBF9] text-slate-800 selection:bg-blue-100">
       {/* Header */}
-      <header className="max-w-6xl mx-auto flex items-center justify-between px-6 py-6 sticky top-0 bg-[#FCFBF9]/90 backdrop-blur-md z-50">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center border border-blue-500/10 shadow-sm">
-            <Wallet size={20} className="text-white" />
+      <header className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4 sm:py-6 sticky top-0 bg-[#FCFBF9]/90 backdrop-blur-md z-50 border-b border-slate-200/20">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-blue-600 flex items-center justify-center border border-blue-500/10 shadow-sm shrink-0">
+            <Wallet size={16} className="text-white sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <span className="text-lg font-bold text-slate-800 tracking-tight block leading-tight font-sans">CredLink</span>
-            <span className="text-[10px] text-blue-600 font-semibold tracking-wider uppercase">Bahi-Khata</span>
+          <div className="flex flex-col">
+            <span className="text-sm sm:text-lg font-bold text-slate-800 tracking-tight block leading-tight font-sans">CredLink</span>
+            <span className="text-[8px] sm:text-[10px] text-blue-600 font-semibold tracking-wider uppercase leading-none mt-0.5 hidden min-[360px]:block">Bahi-Khata</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Language selector */}
-          <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2 py-1.5 transition-all shadow-sm">
-            <Globe size={13} className="text-slate-400 shrink-0" />
+          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-1.5 py-1 sm:px-2.5 sm:py-1.5 transition-all shadow-sm">
+            <Globe size={12} className="text-slate-400 shrink-0 sm:w-3.5 sm:h-3.5" />
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="bg-transparent text-[11px] font-bold text-slate-600 focus:outline-none cursor-pointer border-none pr-1"
+              className="bg-transparent text-[10px] sm:text-[11px] font-bold text-slate-600 focus:outline-none cursor-pointer border-none pr-1"
             >
               {languagesList.map((lang) => (
                 <option key={lang.code} value={lang.code} className="text-slate-700 bg-white text-xs">
-                  {lang.name}
+                  {lang.code === 'hinglish' ? 'Hinglish' : lang.name.split(' ')[0]}
                 </option>
               ))}
             </select>
           </div>
 
-          <Link to="/login" className="btn-primary !py-2.5 !px-5 text-sm">
+          <Link to="/login" className="btn-primary !py-1.5 sm:!py-2 !px-3 sm:!px-4 text-xs sm:text-sm whitespace-nowrap !rounded-xl sm:!rounded-2xl shrink-0">
             {t('loginBtn')}
           </Link>
         </div>
