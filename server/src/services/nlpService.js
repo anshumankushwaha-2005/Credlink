@@ -24,10 +24,12 @@ const HINDI_NUMBER_WORDS = {
 
 const CREDIT_KEYWORDS = [
   'udhaar', 'udhar', 'karz', 'karza', 'karza diya', 'credit', 'diya', 'de diya', 'liya diya',
+  'lene hain', 'lene hai', 'lena hai', 'lena', 'bill', 'maal', 'samaan', 'samana'
 ];
 const PAYMENT_KEYWORDS = [
   'de diye', 'diye', 'wapas', 'chuka', 'chukaya', 'jama', 'payment', 'paid', 'pay kiya',
-  'mila', 'mile', 'received', 'bhar diya', 'bharaya',
+  'mila', 'mile', 'received', 'bhar diya', 'bharaya', 'mil gaye', 'mil gaya', 'jama kiya',
+  'jama karaya'
 ];
 
 const STOPWORDS = new Set([
@@ -38,22 +40,30 @@ const STOPWORDS = new Set([
 ]);
 
 function wordsToAmount(text) {
-  // Handles patterns like "paanch sau" (500), "do hazaar" (2000)
+  // Handles patterns like "paanch sau" (500), "do hazaar paanch sau" (2500) via stateful accumulation
   const tokens = text.toLowerCase().split(/\s+/);
   let total = 0;
+  let current = 0;
   let matchedAny = false;
+  
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i].replace(/[^a-z]/g, '');
     if (HINDI_NUMBER_WORDS[t] !== undefined) {
       matchedAny = true;
       const val = HINDI_NUMBER_WORDS[t];
-      if (val >= 100 && total > 0) {
-        total = total * val;
+      if (val === 100 || val === 1000 || val === 100000) {
+        if (current === 0) {
+          total += val;
+        } else {
+          total += current * val;
+          current = 0;
+        }
       } else {
-        total += val;
+        current += val;
       }
     }
   }
+  total += current;
   return matchedAny ? total : null;
 }
 
@@ -143,11 +153,29 @@ async function extractTransaction(transcript) {
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
-          model: 'llama3-8b-8192',
+          model: 'qwen/qwen3.8-27b',
           messages: [
             {
               role: 'system',
-              content: 'You are a transaction extraction assistant for CredLink, an Indian digital credit ledger (Bahi-Khata).\nYour task is to parse a spoken transaction transcript in Hindi, Hinglish, or English and extract:\n1. customerName: The name of the customer. Always write this name in Latin/English characters (e.g., write "Ramesh" instead of "रमेश"). Capitalize it correctly. Return null if not mentioned.\n2. amount: The transaction amount as a number. Return null if not mentioned.\n3. type: Either "CREDIT" (udhaar diya, credit, khata) or "PAYMENT" (jama kiya, mila, payment, paid back, wapas kiya). Return null if not mentioned.\n4. confidence: A float between 0.0 and 1.0.\n\nReturn ONLY a JSON object in this format:\n{\n  "customerName": string | null,\n  "amount": number | null,\n  "type": "CREDIT" | "PAYMENT" | null,\n  "confidence": number\n}'
+              content: `You are a transaction extraction assistant for CredLink, an Indian digital credit ledger (Bahi-Khata).
+Your task is to parse a spoken transaction transcript in Hindi, Hinglish, or English and extract details into a structured JSON object.
+
+Follow these strict rules:
+1. customerName: Extract the name of the customer. Convert it to English/Latin characters (e.g. write "Ramesh" instead of "रमेश"). Capitalize it correctly. Set to null if the customer name is not explicitly mentioned. Never guess or invent a name.
+2. amount: Extract the transaction amount. It must be a positive number. If the amount is not mentioned, or is not a clear positive number, set to null. Never guess or invent an amount.
+3. type: Determine the transaction type based on the context:
+   - "CREDIT": Used when credit is given to the customer, when the customer owes money, or when a purchase/bill is recorded on credit. Keywords/contexts: "udhaar diya", "baaki", "lene hain", "bill", "maal diya", "samaan diya", "dena hai" (when the customer has to pay the merchant).
+   - "PAYMENT": Used when the customer pays the merchant back, reducing their balance. Keywords/contexts: "jama", "payment", "paid", "de diye", "mil gaye", "mila", "wapas kiya", "received".
+   - Set to null if the type is unclear or not mentioned.
+4. confidence: A float between 0.0 and 1.0 representing how confident you are in the extraction. If any of customerName, amount, or type is null, confidence must be lower than 0.5.
+
+Return ONLY a JSON object in this format (no conversational text around it):
+{
+  "customerName": string | null,
+  "amount": number | null,
+  "type": "CREDIT" | "PAYMENT" | null,
+  "confidence": number
+}`
             },
             {
               role: 'user',
@@ -155,7 +183,7 @@ async function extractTransaction(transcript) {
             }
           ],
           response_format: { type: 'json_object' },
-          temperature: 0.1
+          temperature: 0.0
         },
         {
           headers: {

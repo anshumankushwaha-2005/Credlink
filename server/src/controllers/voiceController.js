@@ -59,6 +59,27 @@ async function transcribeVoice(req, res, next) {
   }
 }
 
+function getLevenshteinDistance(a, b) {
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
 /**
  * POST /api/voice/extract  { transcript, customerId? }
  * Runs the transcript through the rule-based NLP parser. If a customerId is
@@ -75,29 +96,49 @@ async function extractFromVoice(req, res, next) {
     const extraction = await extractTransaction(transcript);
 
     let customer = null;
+    let suggestions = [];
+
     if (customerId) {
       customer = await Customer.findOne({ _id: customerId, merchantId: req.merchantId });
       if (customer) extraction.customerName = customer.name;
     } else if (extraction.customerName) {
-      // Try to auto-match the customer name extracted from speech
-      customer = await Customer.findOne({
-        merchantId: req.merchantId,
-        name: { $regex: new RegExp('^' + extraction.customerName + '$', 'i') }
-      });
-      if (!customer) {
-        customer = await Customer.findOne({
-          merchantId: req.merchantId,
-          name: { $regex: new RegExp(extraction.customerName, 'i') }
+      const allCustomers = await Customer.find({ merchantId: req.merchantId, isActive: true });
+      const cleanTarget = extraction.customerName.toLowerCase().trim();
+
+      // 1. Check exact case-insensitive matches
+      const exactMatches = allCustomers.filter(c => c.name.toLowerCase() === cleanTarget);
+
+      if (exactMatches.length > 0) {
+        if (exactMatches.length === 1) {
+          customer = exactMatches[0];
+          extraction.customerName = customer.name;
+        } else {
+          suggestions = exactMatches;
+        }
+      } else {
+        // 2. Substring & fuzzy matches
+        const fuzzyMatches = allCustomers.filter(c => {
+          const cName = c.name.toLowerCase();
+          if (cName.includes(cleanTarget) || cleanTarget.includes(cName)) {
+            return true;
+          }
+          const dist = getLevenshteinDistance(cName, cleanTarget);
+          // Allow max 2 edits, and it must be at least 65% similar
+          return dist <= 2 && dist / Math.max(cName.length, cleanTarget.length) <= 0.35;
         });
-      }
-      if (customer) {
-        extraction.customerName = customer.name;
+
+        if (fuzzyMatches.length === 1) {
+          customer = fuzzyMatches[0];
+          extraction.customerName = customer.name;
+        } else if (fuzzyMatches.length > 1) {
+          suggestions = fuzzyMatches;
+        }
       }
     }
 
-    const needsReview = extraction.confidence < 0.5 || !extraction.amount || !extraction.type;
+    const needsReview = extraction.confidence < 0.5 || !extraction.amount || !extraction.type || !customer;
 
-    return ok(res, { extraction, needsReview, customer });
+    return ok(res, { extraction, needsReview, customer, suggestions });
   } catch (err) {
     next(err);
   }
@@ -125,6 +166,7 @@ async function searchCustomerByVoice(req, res, next) {
       contentType: req.file.mimetype || 'audio/webm',
     });
     formData.append('model', 'whisper-large-v3');
+    formData.append('temperature', '0.0');
     formData.append('prompt', 'Sharma, Ramesh, Suresh, Rajesh, Vikas, Sunil, Amit, Rahul, Deepak.');
 
     const response = await axios.post(

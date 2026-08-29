@@ -5,7 +5,7 @@ import { Mic, Square, Search, CheckCircle2, Download, MessageCircle, Eye, X, Arr
 import Layout from '../components/layout/Layout.jsx';
 import { useVoice } from '../hooks/useVoice';
 import { useAuth } from '../hooks/useAuth';
-import { listCustomers } from '../services/customerService';
+import { listCustomers, createCustomer } from '../services/customerService';
 import { extractVoice, createTransaction, transcribeVoice } from '../services/transactionService';
 import { downloadBill, sendBillWhatsApp } from '../services/billService';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -36,6 +36,7 @@ export default function VoiceTransaction() {
   const [voiceLang, setVoiceLang] = useState('hi'); // Default: Hindi
   const [confirming, setConfirming] = useState(false);
   const [result, setResult] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
   
   // Modals state
   const [showBillPreview, setShowBillPreview] = useState(false);
@@ -97,19 +98,54 @@ export default function VoiceTransaction() {
     setExtracting(true);
     try {
       const { data } = await extractVoice(text, selectedCustomer?._id);
-      setExtraction(data.data.extraction);
+      const ext = data.data.extraction;
+      setExtraction(ext);
       setNeedsReview(data.data.needsReview);
+
+      const suggestionsList = data.data.suggestions || [];
+      setSuggestions(suggestionsList);
 
       // Auto-select customer if found/matched by the backend NLP
       if (data.data.customer) {
         setSelectedCustomer(data.data.customer);
+        setSuggestions([]);
+      } else if (ext.customerName) {
+        setSearch(ext.customerName); // prefill search input
+      }
+
+      // Trigger toasts/warnings for missing fields
+      const hasName = !!selectedCustomer || !!data.data.customer || !!ext.customerName;
+      const hasAmount = !!ext.amount;
+
+      if (!hasName && !hasAmount) {
+        toast.error('Please say something like: Ramesh ko 500 rupaye ka udhaar diya.', { duration: 5000 });
+      } else if (!hasName) {
+        toast.error('Please say the customer name.', { duration: 4000 });
+      } else if (!hasAmount) {
+        toast.error('Please say the amount.', { duration: 4000 });
       }
 
       setStep(2); // Automatically advance to Step 2 once extracted
     } catch (err) {
-      toast.error('Could not process the transcript');
+      toast.error("Couldn't understand the voice. Please try again.");
     } finally {
       setExtracting(false);
+    }
+  };
+
+  const handleQuickCreate = async (name) => {
+    try {
+      const { data } = await createCustomer({ name });
+      const newCust = data.data.customer;
+      setSelectedCustomer(newCust);
+      setSuggestions([]);
+      toast.success(`Customer "${newCust.name}" created & linked! 🎉`);
+      // Refresh local customers list
+      listCustomers({ limit: 100 }).then(({ data }) => {
+        setCustomers(data.data.customers);
+      });
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to create customer');
     }
   };
 
@@ -182,6 +218,8 @@ export default function VoiceTransaction() {
     setResult(null);
     setExtraction(null);
     setWhatsappResult(null);
+    setSuggestions([]);
+    setSearch('');
     resetTranscript();
   };
 
@@ -458,6 +496,51 @@ export default function VoiceTransaction() {
                   </div>
                 ) : (
                   <div className="space-y-2">
+                    {/* Suggestions list when multiple matches found */}
+                    {suggestions.length > 0 && (
+                      <div className="bg-blue-50/40 border border-blue-100 rounded-2xl p-4 space-y-2.5 animate-slide-up">
+                        <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                          Multiple matches found. Select one:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {suggestions.map((c) => (
+                            <button
+                              key={c._id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedCustomer(c);
+                                setSuggestions([]);
+                              }}
+                              className="bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-xs font-bold text-slate-700 px-3 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                            >
+                              👤 {c.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quick Create option when no matching customer exists but we extracted a name */}
+                    {suggestions.length === 0 && extraction?.customerName && (
+                      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between animate-slide-up">
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            New Customer?
+                          </p>
+                          <p className="text-xs font-bold text-slate-800 mt-0.5">
+                            Create "{extraction.customerName}" in your ledger
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickCreate(extraction.customerName)}
+                          className="btn-primary !py-1.5 !px-3 text-xs !rounded-xl active:scale-95 font-bold whitespace-nowrap shadow-sm shadow-blue-500/10"
+                        >
+                          + Add & Link
+                        </button>
+                      </div>
+                    )}
+
                     <Input
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
