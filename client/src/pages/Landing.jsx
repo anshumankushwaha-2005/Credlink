@@ -339,12 +339,6 @@ export default function Landing() {
                     <span className="text-sm font-bold text-slate-800">Ramesh Kumar</span>
                     <span className="text-sm font-extrabold text-rose-600">₹500 Credit</span>
                   </div>
-                  
-                  {/* Spoken voice response highlight */}
-                  <div className="mt-2 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] text-blue-600 font-bold select-none animate-slide-up">
-                    <span>📢 {voiceRes.label}:</span>
-                    <span className="italic font-medium text-slate-500">{voiceRes.text}</span>
-                  </div>
                 </div>
               </div>
 
@@ -352,14 +346,16 @@ export default function Landing() {
                 <ArrowDown size={14} className="text-slate-300" />
               </div>
 
-              {/* Step 3: Receipt Generated */}
-              <div className="flex items-start gap-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/50">
+              {/* Step 3: Spoken Confirmation */}
+              <div className="flex items-start gap-3 bg-blue-50/30 p-3 rounded-2xl border border-blue-100/50">
                 <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
-                  <FileText size={18} />
+                  <span className="text-base select-none">📢</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">📄 {t('billGenerated')}</p>
-                  <p className="text-xs font-medium text-slate-500 mt-0.5">Receipt #CRL-2026-0012</p>
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">{voiceRes.label}</p>
+                  <p className="text-xs font-bold text-slate-700 mt-1 italic">
+                    {voiceRes.text}
+                  </p>
                 </div>
               </div>
 
