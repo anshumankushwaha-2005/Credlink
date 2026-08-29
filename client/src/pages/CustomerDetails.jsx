@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Mic, FileText, MessageCircle, Phone, MapPin, TrendingUp, TrendingDown, Clock, Check, X } from 'lucide-react';
 import Layout from '../components/layout/Layout.jsx';
+import { useAuth } from '../hooks/useAuth';
 import { getCustomer, updateCustomer } from '../services/customerService';
 import { downloadCustomerStatement } from '../services/reportService';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -15,6 +16,7 @@ import Skeleton from '../components/common/Skeleton.jsx';
 export default function CustomerDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { merchant } = useAuth();
   const [customer, setCustomer] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState(null);
@@ -67,7 +69,8 @@ export default function CustomerDetails() {
   };
 
   const triggerWhatsAppReminder = () => {
-    const message = `Hello ${customer.name}, this is a reminder from Sharma General Store. Your outstanding balance in our digital ledger is ${formatCurrency(customer.currentBalance)}. Please clear it soon. Thank you!`;
+    const shopName = merchant?.businessName || merchant?.name || 'our shop';
+    const message = `Hello ${customer.name}, this is a reminder from ${shopName}. Your outstanding balance in our digital ledger is ${formatCurrency(customer.currentBalance)}. Please clear it soon. Thank you!`;
     const encoded = encodeURIComponent(message);
     const url = `https://wa.me/${customer.phone || ''}?text=${encoded}`;
     window.open(url, '_blank');
