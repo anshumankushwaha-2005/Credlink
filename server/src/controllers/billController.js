@@ -43,12 +43,14 @@ async function getBill(req, res, next) {
 /** GET /api/bills/:transactionId/download - streams the PDF file, regenerating if missing */
 async function downloadBill(req, res, next) {
   try {
-    const transaction = await Transaction.findOne({ _id: req.params.transactionId, merchantId: req.merchantId }).populate(
+    const transaction = await Transaction.findById(req.params.transactionId).populate(
       'customerId'
     );
     if (!transaction) return fail(res, 'Bill not found.', 404);
 
-    const merchant = await Merchant.findById(req.merchantId);
+    const merchant = await Merchant.findById(transaction.merchantId);
+    if (!merchant) return fail(res, 'Merchant not found.', 404);
+
     const pdfPath = await generateTransactionPDF({ merchant, customer: transaction.customerId, transaction });
     transaction.pdfPath = pdfPath;
     transaction.pdfGenerated = true;

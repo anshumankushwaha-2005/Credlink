@@ -100,13 +100,7 @@ export default function Login() {
               We'll send a secure OTP to your email.<br />No password needed. Keep your account clean.
             </p>
           </div>
-
-          {/* Demo account card */}
-          <div className="mt-8 p-3 rounded-2xl bg-blue-50/50 border border-blue-100/50 text-center">
-            <p className="text-xs text-blue-800 font-medium">
-              Demo Account: <span className="font-mono bg-blue-100/60 px-1.5 py-0.5 rounded text-blue-900 font-bold select-all">demo@credlink.test</span>
-            </p>
-          </div>
+          {/* Demo account card removed */}
         </div>
 
         {/* Right Side: Friendly Illustration Banner */}
