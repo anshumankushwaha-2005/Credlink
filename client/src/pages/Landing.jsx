@@ -152,14 +152,14 @@ const localTranslations = {
 const getFeatures = (lang) => {
   const translations = {
     en: [
-      { icon: Mic, title: 'Voice Entry', desc: 'Speak naturally in Hindi, Hinglish, or English. No typing needed.' },
+      { icon: Mic, title: 'Voice Entry & Response', desc: 'Speak naturally in Hindi, Hinglish, or English. Get instant spoken confirmations.' },
       { icon: Wallet, title: 'Credit Ledger', desc: 'Accurately track customer balances, total credits, and payments.' },
       { icon: FileText, title: 'Instant Bills', desc: 'Professional PDF bills are automatically generated in real-time.' },
       { icon: MessageCircle, title: 'WhatsApp Sharing', desc: 'Send digital receipts and statements directly to customers.' },
       { icon: Globe, title: 'Multi-Lingual Bahi-Khata', desc: 'Operate the app in 9 Indian languages (Hindi, Marathi, Gujarati, etc.).' },
     ],
     hi: [
-      { icon: Mic, title: 'आवाज़ प्रविष्टि', desc: 'हिंदी, हिंग्लिश या अंग्रेजी में स्वाभाविक रूप से बोलें। टाइपिंग की आवश्यकता नहीं है।' },
+      { icon: Mic, title: 'वॉयस एंट्री और रिस्पॉन्स', desc: 'हिंदी, हिंग्लिश या अंग्रेजी में बोलें और तुरंत ऑडियो पुष्टि (Spoken Confirmation) प्राप्त करें।' },
       { icon: Wallet, title: 'क्रेडिट लेजर', desc: 'ग्राहक के बकाया, कुल क्रेडिट और भुगतान को सटीक रूप से ट्रैक करें।' },
       { icon: FileText, title: 'त्वरित बिल', desc: 'पेशेवर पीडीएफ बिल वास्तविक समय में स्वचालित रूप से उत्पन्न होते हैं।' },
       { icon: MessageCircle, title: 'व्हाट्सएप साझाकरण', desc: 'डिजिटल रसीदें और विवरण सीधे ग्राहकों को भेजें।' },
