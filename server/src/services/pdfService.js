@@ -7,7 +7,8 @@ if (!fs.existsSync(BILLS_DIR)) fs.mkdirSync(BILLS_DIR, { recursive: true });
 
 function formatINR(amount) {
   const n = Number(amount) || 0;
-  return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const absFormatted = Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (n < 0 ? '-' : '') + 'Rs. ' + absFormatted;
 }
 
 function formatDate(date) {
