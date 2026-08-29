@@ -23,7 +23,8 @@ async function transcribeVoice(req, res, next) {
       filename: req.file.originalname || 'audio.webm',
       contentType: req.file.mimetype || 'audio/webm',
     });
-    formData.append('model', 'whisper-large-v3-turbo');
+    formData.append('model', 'whisper-large-v3');
+    formData.append('temperature', '0.0');
 
     if (language && language !== 'auto') {
       formData.append('language', language);
