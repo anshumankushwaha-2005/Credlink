@@ -87,13 +87,15 @@ app.get('/api/debug-status', async (req, res) => {
 
   try {
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_PORT === 465,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
       },
+      connectionTimeout: 8000,
+      socketTimeout: 8000,
     });
     await transporter.verify();
     debug.smtp.status = 'verified';
