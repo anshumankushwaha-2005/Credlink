@@ -26,7 +26,7 @@ function getTransporter() {
 function sendViaBrevoAPI(email, subject, html) {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
-      sender: { name: "CredLink", email: env.SMTP_USER },
+      sender: { name: "CredLink", email: process.env.SENDER_EMAIL || env.SMTP_USER },
       to: [{ email: email }],
       subject: subject,
       htmlContent: html
@@ -104,7 +104,7 @@ async function sendOTPEmail(email, otp) {
   try {
     const tx = getTransporter();
     await tx.sendMail({
-      from: `"CredLink" <${env.SMTP_USER}>`,
+      from: `"CredLink" <${process.env.SENDER_EMAIL || env.SMTP_USER}>`,
       to: email,
       subject: `Your CredLink login OTP: ${otp}`,
       html,
