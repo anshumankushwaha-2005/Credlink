@@ -265,15 +265,24 @@ export default function Dashboard() {
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl"></div>
           <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-blue-400/10 rounded-full blur-2xl"></div>
 
-          <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-3 relative z-10">
+          <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-3.5 relative z-10 w-full md:w-auto">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
-              <span>Primary Action</span>
+              <span>🎙️ Voice-Powered Transactions</span>
             </div>
-            <h3 className="text-xl md:text-2xl font-extrabold tracking-tight">Add Transaction using Voice</h3>
-            <p className="text-blue-50/90 text-xs md:text-sm max-w-md leading-relaxed">
-              Just speak naturally. For example, say:<br />
-              <strong className="text-white font-bold bg-white/10 px-2 py-0.5 rounded italic">"Ramesh ko 500 rupaye udhaar diya"</strong>
+            <h3 className="text-xl md:text-2xl font-extrabold tracking-tight">Add Ledger Entries using Voice</h3>
+            <p className="text-blue-100 text-xs md:text-sm max-w-md leading-relaxed font-semibold">
+              Speak naturally in Hindi, Hinglish, or English and get instant spoken confirmations.
             </p>
+            <div className="flex flex-col gap-1.5 text-[11px] text-blue-100 bg-white/10 p-4 rounded-2xl border border-white/5 max-w-md w-full font-bold text-left animate-slide-up">
+              <span className="text-white uppercase tracking-wider text-[9px] opacity-70">Example Command:</span>
+              <span className="bg-white/10 px-2.5 py-1.5 rounded-xl font-mono text-white select-all">
+                "Ramesh ko 500 rupaye udhaar diya"
+              </span>
+              <span className="text-white uppercase tracking-wider text-[9px] opacity-70 mt-1">Instant Spoken Confirmation:</span>
+              <span className="text-blue-200 italic font-medium">
+                📢 "Ramesh ke account mein 500 rupaye add kiye gaye hain."
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-col items-center gap-3 shrink-0 relative z-10">
