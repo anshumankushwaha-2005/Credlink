@@ -17,6 +17,7 @@ const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({
   origin: function (origin, callback) {
