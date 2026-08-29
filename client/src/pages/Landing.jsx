@@ -225,6 +225,20 @@ export default function Landing() {
     return dict[key] || localTranslations['en'][key] || key;
   };
   const features = getFeatures(language);
+  const voiceRes = (() => {
+    const mappings = {
+      en: { label: "Voice Confirmation", text: '"Ramesh ke account mein 500 rupaye add kiye gaye hain."' },
+      hi: { label: "ऑडियो पुष्टि", text: '"रमेश के अकाउंट में 500 रुपये ऐड किए गए हैं।"' },
+      hinglish: { label: "Voice Confirmation", text: '"Ramesh ke account mein 500 rupaye add kiye gaye hain."' },
+      mr: { label: "ऑडिओ पुष्टीकरण", text: '"रमेशच्या खात्यात 500 रुपये जमा केले आहेत"' },
+      gu: { label: "વૉઇસ પુષ્ટિ", text: '"રમેશના ખાતામાં 500 રૂપિયા ઉમેરવામાં આવ્યા છે"' },
+      ta: { label: "குரல் உறுதிப்படுத்தல்", text: '"ரமேஷ் கணக்கில் 500 ரூபாய் சேர்க்கப்பட்டுள்ளது"' },
+      te: { label: "వాయిస్ నిర్ధారణ", text: '"రమేష్ ఖాతాలో 500 రూపాయలు జోడించబడ్డాయి"' },
+      bn: { label: "ভয়েস নিশ্চিতকরণ", text: '"রমেশের অ্যাকাউন্টে 500 টাকা যোগ করা হয়েছে"' },
+      pa: { label: "ਆਵਾਜ਼ ਦੀ ਪੁਸ਼ਟੀ", text: '"ਰਮੇਸ਼ ਦੇ ਖਾਤੇ ਵਿੱਚ 500 ਰੁਪਏ ਜੋੜ ਦਿੱਤੇ ਗਏ ਹਨ"' }
+    };
+    return mappings[language] || mappings['en'];
+  })();
   return (
     <div className="min-h-screen bg-[#FCFBF9] text-slate-800 selection:bg-blue-100">
       {/* Header */}
@@ -324,6 +338,12 @@ export default function Landing() {
                   <div className="flex justify-between items-center mt-1">
                     <span className="text-sm font-bold text-slate-800">Ramesh Kumar</span>
                     <span className="text-sm font-extrabold text-rose-600">₹500 Credit</span>
+                  </div>
+                  
+                  {/* Spoken voice response highlight */}
+                  <div className="mt-2 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] text-blue-600 font-bold select-none animate-slide-up">
+                    <span>📢 {voiceRes.label}:</span>
+                    <span className="italic font-medium text-slate-500">{voiceRes.text}</span>
                   </div>
                 </div>
               </div>
