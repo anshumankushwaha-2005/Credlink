@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Mic, FileText, MessageCircle, Phone, MapPin, TrendingUp, TrendingDown, Clock } from 'lucide-react';
+import { ArrowLeft, Mic, FileText, MessageCircle, Phone, MapPin, TrendingUp, TrendingDown, Clock, Check, X } from 'lucide-react';
 import Layout from '../components/layout/Layout.jsx';
-import { getCustomer } from '../services/customerService';
+import { getCustomer, updateCustomer } from '../services/customerService';
 import { downloadCustomerStatement } from '../services/reportService';
 import { formatCurrency } from '../utils/formatCurrency';
 import { formatDateTime } from '../utils/formatDate';
@@ -20,6 +20,8 @@ export default function CustomerDetails() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [tempPhone, setTempPhone] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -49,6 +51,18 @@ export default function CustomerDetails() {
       toast.error('Failed to generate statement');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handlePhoneSave = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await updateCustomer(id, { phone: tempPhone });
+      setCustomer(data.data.customer);
+      setIsEditingPhone(false);
+      toast.success('Phone number updated successfully! 🎉');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update phone number');
     }
   };
 
@@ -103,11 +117,50 @@ export default function CustomerDetails() {
               </div>
               <div>
                 <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">{customer.name}</h2>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-slate-405 font-semibold">
-                  <span className="flex items-center gap-1">
-                    <Phone size={12} />
-                    {customer.phone || 'No phone number'}
-                  </span>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-1 text-xs text-slate-405 font-semibold items-center">
+                  {isEditingPhone ? (
+                    <form onSubmit={handlePhoneSave} className="flex items-center gap-1.5 animate-slide-up bg-slate-50/50 p-1 rounded-xl border border-slate-200">
+                      <input
+                        type="text"
+                        value={tempPhone}
+                        onChange={(e) => setTempPhone(e.target.value)}
+                        placeholder="10-digit phone..."
+                        className="text-xs px-2 py-0.5 rounded-lg border border-slate-200 focus:outline-none focus:border-blue-400 w-32 font-bold text-slate-700 bg-white"
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        className="bg-blue-650 hover:bg-blue-750 text-white rounded-lg p-1 transition-all active:scale-90"
+                        title="Save"
+                      >
+                        <Check size={10} className="stroke-[3]" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingPhone(false)}
+                        className="bg-white hover:bg-slate-100 text-slate-500 border border-slate-200 rounded-lg p-1 transition-all active:scale-90"
+                        title="Cancel"
+                      >
+                        <X size={10} className="stroke-[3]" />
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <span className="flex items-center gap-1">
+                        <Phone size={12} />
+                        {customer.phone || 'No phone number'}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setTempPhone(customer.phone || '');
+                          setIsEditingPhone(true);
+                        }}
+                        className="text-[9px] text-blue-600 hover:text-blue-800 font-extrabold uppercase ml-1.5 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-lg tracking-wider active:scale-95 transition-all"
+                      >
+                        {customer.phone ? 'Edit' : 'Add'}
+                      </button>
+                    </div>
+                  )}
                   {customer.address && (
                     <span className="flex items-center gap-1">
                       <MapPin size={12} />
