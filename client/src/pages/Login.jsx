@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Wallet, Mail, ArrowRight, Store, ShieldCheck } from 'lucide-react';
+import { Wallet, Mail, ArrowRight, Store, ShieldCheck, Globe } from 'lucide-react';
 import { sendOtp } from '../services/authService';
 import { isValidEmail } from '../utils/validators';
+import { useTranslation, languagesList } from '../context/LanguageContext';
 import Input from '../components/common/Input.jsx';
 import Button from '../components/common/Button.jsx';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const { language, setLanguage, t } = useTranslation();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -41,11 +43,28 @@ export default function Login() {
         {/* Left Side: Auth Form */}
         <div className="p-8 md:p-12 flex flex-col justify-between">
           {/* Brand Header */}
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
-              <Wallet size={18} className="text-white" />
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
+                <Wallet size={18} className="text-white" />
+              </div>
+              <span className="text-base font-bold text-slate-800 tracking-tight leading-none">CredLink</span>
             </div>
-            <span className="text-base font-bold text-slate-800 tracking-tight leading-none">CredLink</span>
+            {/* Language Selector */}
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200/50 rounded-xl px-2 py-1 transition-all">
+              <Globe size={12} className="text-slate-400 shrink-0" />
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="bg-transparent text-[10px] font-bold text-slate-600 focus:outline-none cursor-pointer border-none"
+              >
+                {languagesList.map((lang) => (
+                  <option key={lang.code} value={lang.code} className="text-slate-700 bg-white text-xs">
+                    {lang.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Form Content */}

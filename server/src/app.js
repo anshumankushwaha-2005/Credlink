@@ -18,7 +18,28 @@ const reportRoutes = require('./routes/reportRoutes');
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: false }));
-app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const allowed = [
+      'https://credlink-six.vercel.app',
+      'https://credlink-six.vercel.app/',
+      env.CLIENT_URL,
+      env.CLIENT_URL ? env.CLIENT_URL + '/' : ''
+    ].filter(Boolean);
+    
+    // Clean trailing slash for checking
+    const cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    const cleanAllowed = allowed.map(url => url.endsWith('/') ? url.slice(0, -1) : url);
+
+    if (cleanAllowed.includes(cleanOrigin) || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+      callback(null, origin); // Reflect request origin
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
