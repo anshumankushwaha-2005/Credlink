@@ -13,10 +13,247 @@ import Button from '../components/common/Button.jsx';
 import Skeleton from '../components/common/Skeleton.jsx';
 import Modal from '../components/common/Modal.jsx';
 import toast from 'react-hot-toast';
+import { useTranslation } from '../context/LanguageContext';
+
+const localDashboardTranslations = {
+  en: {
+    todaysOverview: "Here's how your shop is doing today.",
+    activeCredit: "Active credit in ledger",
+    totalAccounts: "Total registered shop accounts",
+    recordedInLedger: "Recorded in ledger",
+    receivedUPI: "Received in cash/UPI",
+    addVoiceDescription: "Speak naturally in Hindi, Hinglish, or English and get instant spoken confirmations.",
+    exampleCommandLabel: "Example Command:",
+    voiceConfirmationLabel: "Instant Spoken Confirmation:",
+    tapToSpeak: "Tap to Speak",
+    addCustomerSub: "Register a new shop customer",
+    voiceSearchSub: "Say customer name to open profile",
+    statementsTitle: "Customer Statements",
+    statementsSub: "Generate and share PDF statements",
+    viewAllHistory: "View All History",
+    noTransactionsSub: "Tap the microphone card above to start voice entry!",
+    customerSearchTitle: "Voice Search Customer",
+    outstanding: "Outstanding",
+    customers: "Customers",
+    recentTransactions: "Recent Transactions",
+    addCustomer: "Add Customer",
+    voiceSearch: "Voice Search",
+  },
+  hi: {
+    todaysOverview: "यहाँ आपके दुकान का आज का लेखा-जोखा है।",
+    activeCredit: "लेजर में सक्रिय उधार",
+    totalAccounts: "कुल पंजीकृत दुकान खाते",
+    recordedInLedger: "बही-खाते में दर्ज",
+    receivedUPI: "नकद/UPI में प्राप्त",
+    addVoiceDescription: "हिंदी, हिंग्लिश या अंग्रेजी में स्वाभाविक रूप से बोलें और तुरंत ऑडियो पुष्टि प्राप्त करें।",
+    exampleCommandLabel: "उदाहरण कमांड:",
+    voiceConfirmationLabel: "त्वरित ऑडियो पुष्टि:",
+    tapToSpeak: "बोलने के लिए टैप करें",
+    addCustomerSub: "नया दुकान ग्राहक पंजीकृत करें",
+    voiceSearchSub: "प्रोफ़ाइल खोलने के लिए ग्राहक का नाम बोलें",
+    statementsTitle: "ग्राहक विवरण (Statements)",
+    statementsSub: "पीडीएफ विवरण बनाएं और साझा करें",
+    viewAllHistory: "पूरा इतिहास देखें",
+    noTransactionsSub: "वॉयस एंट्री शुरू करने के लिए ऊपर माइक कार्ड पर टैप करें!",
+    customerSearchTitle: "ग्राहक आवाज़ खोज",
+    outstanding: "कुल बकाया (Outstanding)",
+    customers: "ग्राहक सूची",
+    recentTransactions: "हाल के लेन-देन",
+    addCustomer: "ग्राहक जोड़ें",
+    voiceSearch: "आवाज़ खोज",
+  },
+  hinglish: {
+    todaysOverview: "Apne shop ka aaj ka ledger check karein.",
+    activeCredit: "Active credit ledger book me",
+    totalAccounts: "Total registered accounts",
+    recordedInLedger: "Ledger book me saved",
+    receivedUPI: "Cash ya UPI me received",
+    addVoiceDescription: "Speak naturally in Hindi, Hinglish, or English and get instant spoken confirmations.",
+    exampleCommandLabel: "Example Command:",
+    voiceConfirmationLabel: "Instant Spoken Confirmation:",
+    tapToSpeak: "Tap to Speak",
+    addCustomerSub: "Register a new shop customer",
+    voiceSearchSub: "Say customer name to open profile",
+    statementsTitle: "Customer Statements",
+    statementsSub: "Generate and share PDF statements",
+    viewAllHistory: "View All History",
+    noTransactionsSub: "Tap the microphone card above to start voice entry!",
+    customerSearchTitle: "Voice Search Customer",
+    outstanding: "Outstanding",
+    customers: "Customers",
+    recentTransactions: "Recent Transactions",
+    addCustomer: "Add Customer",
+    voiceSearch: "Voice Search",
+  },
+  mr: {
+    todaysOverview: "तुमच्या दुकानाची आजची स्थिती खालीलप्रमाणे आहे.",
+    activeCredit: "खातेवहीमध्ये सक्रिय उधार",
+    totalAccounts: "एकूण नोंदणीकृत दुकानाचे खाते",
+    recordedInLedger: "खातेवहीत नोंदवले गेले",
+    receivedUPI: "रोख/UPI मध्ये प्राप्त झाले",
+    addVoiceDescription: "हिंदी, हिंग्लिश किंवा इंग्रजीमध्ये नैसर्गिकरित्या बोला आणि झटपट ऑडिओ पुष्टीकरण मिळवा.",
+    exampleCommandLabel: "उदाहरण कमांड:",
+    voiceConfirmationLabel: "झटपट ऑडिओ पुष्टीकरण:",
+    tapToSpeak: "बोलण्यासाठी टॅप करा",
+    addCustomerSub: "नवीन दुकान ग्राहक नोंदवा",
+    voiceSearchSub: "प्रोफाइल उघडण्यासाठी ग्राहकाचे नाव बोला",
+    statementsTitle: "ग्राहक अहवाल (Statements)",
+    statementsSub: "पीडीएफ अहवाल तयार करा आणि शेअर करा",
+    viewAllHistory: "सर्व इतिहास पहा",
+    noTransactionsSub: "आवाज नोंदणी सुरू करण्यासाठी वरील माइक कार्डवर टॅप करा!",
+    customerSearchTitle: "ग्राहक आवाज शोध",
+    outstanding: "थकीत (Outstanding)",
+    customers: "ग्राहक",
+    recentTransactions: "अलीकडील व्यवहार",
+    addCustomer: "ग्राहक जोडा",
+    voiceSearch: "आवाज शोध",
+  },
+  gu: {
+    todaysOverview: "અહીં તમારી દુકાનનું આજનું સરવૈયું છે.",
+    activeCredit: "ખાતાવહીમાં સક્રિય ઉધાર",
+    totalAccounts: "કુલ નોંધાયેલા દુકાનના ખાતા",
+    recordedInLedger: "ખાતાવહીમાં નોંધાયેલ છે",
+    receivedUPI: "રોકડ/UPI માં મળેલ",
+    addVoiceDescription: "હિન્દી, હિંગ્લિશ અથવા અંગ્રેજીમાં સ્વાભાવિક રીતે બોલો અને ત્વરિત વૉઇસ કન્ફર્મેશન મેળવો.",
+    exampleCommandLabel: "ઉદાહરણ કમાન્ડ:",
+    voiceConfirmationLabel: "અવાજ પ્રતિસાદ:",
+    tapToSpeak: "બોલવા માટે ટેપ કરો",
+    addCustomerSub: "નવો દુકાન ગ્રાહક નોંધો",
+    voiceSearchSub: "પ્રોફાઇલ ખોલવા માટે ગ્રાહકનું નામ બોલો",
+    statementsTitle: "ગ્રાહક પત્રકો (Statements)",
+    statementsSub: "પીડીએફ પત્રક બનાવો અને શેર કરો",
+    viewAllHistory: "બધો ઇતિહાસ જુઓ",
+    noTransactionsSub: "અવાજ નોંધણી શરૂ કરવા માટે ઉપરના માઇક કાર્ડ પર ટેપ કરો!",
+    customerSearchTitle: "ગ્રાહક અવાજ શોધ",
+    outstanding: "બાકી (Outstanding)",
+    customers: "ગ્રાહકો",
+    recentTransactions: "તાજેતરના વ્યવહારો",
+    addCustomer: "ગ્રાહક ઉમેરો",
+    voiceSearch: "અવાજ શોધ",
+  },
+  ta: {
+    todaysOverview: "இன்று உங்கள் கடையின் செயல்பாடுகள் இதோ.",
+    activeCredit: "கணக்கு புத்தகத்தில் செயலில் உள்ள கடன்",
+    totalAccounts: "பதிவுசெய்யப்பட்ட மொத்த கணக்குகள்",
+    recordedInLedger: "கணக்கு புத்தகத்தில் பதிவு செய்யப்பட்டது",
+    receivedUPI: "பணம்/UPI மூலம் பெறப்பட்டது",
+    addVoiceDescription: "இந்தி, ஹிங்கிலிஷ் அல்லது ஆங்கிலத்தில் இயல்பாகப் பேசுங்கள் மற்றும் உடனடி குரல் உறுதிப்படுத்தலைப் பெறுங்கள்.",
+    exampleCommandLabel: "உதாரண கட்டளை:",
+    voiceConfirmationLabel: "உடனடி குரல் உறுதிப்படுத்தல்:",
+    tapToSpeak: "பேச தட்டவும்",
+    addCustomerSub: "புதிய வாடிக்கையாளரை பதிவு செய்யவும்",
+    voiceSearchSub: "விவரக்குறிப்பைத் திறக்க வாடிக்கையாளர் பெயரைக் கூறவும்",
+    statementsTitle: "வாடிக்கையாளர் அறிக்கைகள்",
+    statementsSub: "PDF அறிக்கைகளை உருவாக்கி பகிரவும்",
+    viewAllHistory: "முழு வரலாற்றையும் காண்க",
+    noTransactionsSub: "குരல் பதிவைத் தொடங்க மேலே உள்ள மைக் கார்டைத் தட்டவும்!",
+    customerSearchTitle: "வாடிக்கையாளர் குரல் தேடல்",
+    outstanding: "நிலுவையில் உள்ளது (Outstanding)",
+    customers: "வாடிக்கையாளர்கள்",
+    recentTransactions: "சமீபத்திய பரிவர்த்தனைகள்",
+    addCustomer: "வாடிக்கையாளரைச் சேர்",
+    voiceSearch: "குரல் தேடல்",
+  },
+  te: {
+    todaysOverview: "ఈ రోజు మీ షాప్ పనితీరు ఇక్కడ ఉంది.",
+    activeCredit: "ఖాతా పుస్తకంలో సక్రియ అప్పు",
+    totalAccounts: "మొత్తం నమోదైన షాప్ ఖాతాలు",
+    recordedInLedger: "ఖాతా పుస్తకంలో నమోదైనది",
+    receivedUPI: "నగదు/UPI లో స్వీకరించబడింది",
+    addVoiceDescription: "హిందీ, హింగ్లీష్ లేదా ఇంగ్లీషులో సహజంగా మాట్లాడండి మరియు తక్షణ వాయిస్ నిర్ధారణను పొందండి.",
+    exampleCommandLabel: "ఉదాహరణ కమాండ్:",
+    voiceConfirmationLabel: "తక్షణ వాయిస్ నిర్ధారణ:",
+    tapToSpeak: "మాట్లాడటానికి ట్యాప్ చేయండి",
+    addCustomerSub: "కొత్త షాప్ కస్టమర్‌ను నమోదు చేయండి",
+    voiceSearchSub: "ప్రొఫైల్ తెరవడానికి కస్టమర్ పేరు చెప్పండి",
+    statementsTitle: "కస్టమర్ నివేదికలు (Statements)",
+    statementsSub: "PDF నివేదికలను సృష్టించండి మరియు భాగస్వామ్యం చేయండి",
+    viewAllHistory: "మొత్తం చరిత్రను వీక్షించండి",
+    noTransactionsSub: "వాయిస్ ఎంట్రీని ప్రారంభించడానికి పైన ఉన్న మైక్ కార్డ్‌ను ట్యాప్ చేయండి!",
+    customerSearchTitle: "కస్టమర్ వాయిస్ శోధన",
+    outstanding: "బాకీ ఉంది (Outstanding)",
+    customers: "కస్టమర్లు",
+    recentTransactions: "ఇటీవలి లావాదేవీలు",
+    addCustomer: "కస్టమర్‌ను జోడించు",
+    voiceSearch: "వాయిస్ శోధన",
+  },
+  bn: {
+    todaysOverview: "আজকে আপনার দোকানের হিসাব এখানে রয়েছে।",
+    activeCredit: "খাতায় সক্রিয় ধার",
+    totalAccounts: "মোট নিবন্ধিত দোকান অ্যাকাউন্ট",
+    recordedInLedger: "খাতায় সংরক্ষিত হয়েছে",
+    receivedUPI: "নগদ/UPI তে প্রাপ্ত হয়েছে",
+    addVoiceDescription: "হিন্দি, হিংলিশ বা ইংরেজিতে স্বাভাবিকভাবে বলুন এবং তাৎক্ষণিক ভয়েস নিশ্চিতকরণ পান।",
+    exampleCommandLabel: "उदाहरण कमांड:",
+    voiceConfirmationLabel: "তাৎক্ষণিক ভয়েস নিশ্চিতকরণ:",
+    tapToSpeak: "বলার জন্য ট্যাপ করুন",
+    addCustomerSub: "নতুন দোকান গ্রাহক নিবন্ধন করুন",
+    voiceSearchSub: "প্রোফাইল খুলতে গ্রাহকের নাম বলুন",
+    statementsTitle: "গ্রাহক বিবরণী (Statements)",
+    statementsSub: "পিডিএফ বিবরণী তৈরি এবং শেয়ার করুন",
+    viewAllHistory: "সব ইতিহাস দেখুন",
+    noTransactionsSub: "ভয়েস এন্ট্রি শুরু করতে উপরের মাইক কার্ডে ট্যাপ করুন!",
+    customerSearchTitle: "গ্রাহক ভয়েস অনুসন্ধান",
+    outstanding: "বকেয়া (Outstanding)",
+    customers: "গ্রাহকগণ",
+    recentTransactions: "সাম্প্রতিক লেনদেন",
+    addCustomer: "গ্রাহক যোগ করুন",
+    voiceSearch: "ভয়েস অনুসন্ধান",
+  },
+  pa: {
+    todaysOverview: "ਅੱਜ ਤੁਹਾਡੀ ਦੁਕਾਨ ਦਾ ਹਿਸਾਬ-ਕਿਤਾਬ ਇੱਥੇ ਹੈ।",
+    activeCredit: "ਖਾਤਾ ਵਹੀ ਵਿੱਚ ਸਰਗਰਮ ਉਧਾਰ",
+    totalAccounts: "ਕੁੱਲ ਰਜਿਸਟਰਡ ਦੁਕਾਨ ਖਾਤੇ",
+    recordedInLedger: "ਖਾਤਾ ਵਹੀ ਵਿੱਚ ਦਰਜ",
+    receivedUPI: "ਨਕਦ/UPI ਵਿੱਚ ਪ੍ਰਾਪਤ ਹੋਇਆ",
+    addVoiceDescription: "ਹਿੰਦੀ, ਹਿੰਗਲਿਸ਼ ਜਾਂ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਕੁਦਰਤੀ ਤੌਰ ਤੇ ਬੋਲੋ ਅਤੇ ਤੁਰੰਤ ਆਵਾਜ਼ ਦੀ ਪੁਸ਼ਟੀ ਪ੍ਰਾਪਤ ਕਰੋ।",
+    exampleCommandLabel: "ਉਦਾਹਰਣ ਕਮਾਂਡ:",
+    voiceConfirmationLabel: "ਤੁਰੰਤ ਆਵਾਜ਼ ਦੀ ਪੁਸ਼ਟੀ:",
+    tapToSpeak: "ਬੋਲਣ ਲਈ ਟੈਪ ਕਰੋ",
+    addCustomerSub: "ਨਵਾਂ ਦੁਕਾਨ ਗਾਹਕ ਰਜਿਸਟਰ ਕਰੋ",
+    voiceSearchSub: "ਪ੍ਰੋਫਾਈਲ ਖੋਲ੍ਹਣ ਲਈ ਗ੍ਰਾਹਕ ਦਾ ਨਾਮ ਬੋਲੋ",
+    statementsTitle: "ਗਾਹਕ ਸਟੇਟਮੈਂਟਾਂ (Statements)",
+    statementsSub: "PDF ਸਟੇਟਮੈਂਟਾਂ ਬਣਾਓ ਅਤੇ ਸਾਂਝੀਆਂ ਕਰੋ",
+    viewAllHistory: "ਸਾਰਾ ਇਤਿਹਾਸ ਦੇਖੋ",
+    noTransactionsSub: "ਆਵਾਜ਼ ਐਂਟਰੀ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਉੱਪਰ ਦਿੱਤੇ ਮਾਈਕ ਕਾਰਡ 'ਤੇ ਟੈਪ ਕਰੋ!",
+    customerSearchTitle: "ਗਾਹਕ ਆਵਾਜ਼ ਖੋਜ",
+    outstanding: "ਬਕਾਇਆ (Outstanding)",
+    customers: "ਗਾਹਕ",
+    recentTransactions: "ਤਾਜ਼ਾ ਲੈਣ-ਦੇਣ",
+    addCustomer: "ਗਾਹਕ ਜੋੜੋ",
+    voiceSearch: "ਆਵਾਜ਼ ਖੋਜ",
+  }
+};
 
 export default function Dashboard() {
   const { merchant } = useAuth();
   const navigate = useNavigate();
+  const { language, t } = useTranslation();
+
+  const dt = (key) => {
+    const dict = localDashboardTranslations[language] || localDashboardTranslations['en'];
+    return dict[key] || localDashboardTranslations['en'][key] || key;
+  };
+
+  const getGreeting = () => {
+    const hrs = new Date().getHours();
+    const greetings = {
+      en: { morning: 'Good Morning', afternoon: 'Good Afternoon', evening: 'Good Evening' },
+      hi: { morning: 'शुभ प्रभात', afternoon: 'नमस्कार', evening: 'शुभ संध्या' },
+      hinglish: { morning: 'Good Morning', afternoon: 'Good Afternoon', evening: 'Good Evening' },
+      mr: { morning: 'शुभ प्रभात', afternoon: 'शुभ दुपार', evening: 'शुभ संध्या' },
+      gu: { morning: 'શુભ પ્રભાત', afternoon: 'શુભ બપોર', evening: 'શુભ સાંજ' },
+      ta: { morning: 'காலை வணக்கம்', afternoon: 'மதிய வணக்கம்', evening: 'மாலை வணக்கம்' },
+      te: { morning: 'శుభోదయం', afternoon: 'మధ్యాహ్న వందనం', evening: 'సాయంత్ర వందనం' },
+      bn: { morning: 'সুপ্রভাত', afternoon: 'शुभ दोपहर', evening: 'शुभ संध्या' },
+      pa: { morning: 'ਸ਼ੁਭ ਪ੍ਰਭਾਤ', afternoon: 'ਸ਼ੁਭ ਦੁਪਹਿਰ', evening: 'ਸ਼ੁਭ ਸ਼ਾਮ' }
+    };
+    
+    const langGreetings = greetings[language] || greetings['en'];
+    if (hrs < 12) return langGreetings.morning;
+    if (hrs < 17) return langGreetings.afternoon;
+    return langGreetings.evening;
+  };
   const [stats, setStats] = useState({
     totalCustomers: 0,
     outstandingCredit: 0,
@@ -40,13 +277,7 @@ export default function Dashboard() {
     resetTranscript: resetSearchTranscript,
   } = useVoice();
 
-  // Dynamic time-based greeting
-  const getGreeting = () => {
-    const hrs = new Date().getHours();
-    if (hrs < 12) return 'Good morning';
-    if (hrs < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
+
 
   useEffect(() => {
     (async () => {
@@ -148,7 +379,7 @@ export default function Dashboard() {
   };
 
   return (
-    <Layout title="Dashboard">
+    <Layout title={t('dashboard')}>
       <div className="space-y-6">
         
         {/* Dynamic Welcomer Header with Voice Search Quick Action */}
@@ -157,14 +388,14 @@ export default function Dashboard() {
             <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 tracking-tight">
               {getGreeting()}, {merchant?.name || 'Merchant'} 👋
             </h2>
-            <p className="text-xs md:text-sm text-slate-400 mt-0.5 font-medium">Here's how your shop is doing today.</p>
+            <p className="text-xs md:text-sm text-slate-400 mt-0.5 font-medium">{dt('todaysOverview')}</p>
           </div>
           <button
             onClick={() => setShowVoiceSearch(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-2xl border border-blue-100/50 text-xs font-bold active:scale-95 transition-all shadow-sm shadow-blue-500/5"
           >
             <Mic size={14} className="animate-pulse" />
-            <span>Voice Search</span>
+            <span>{dt('voiceSearch')}</span>
           </button>
         </div>
 
@@ -175,7 +406,7 @@ export default function Dashboard() {
           <Card hoverable={true} delayIdx={1} className="!p-3.5 sm:!p-5 border-l-4 border-l-rose-500 relative overflow-hidden group">
             <div className="flex justify-between items-start gap-1">
               <div className="min-w-0">
-                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Outstanding</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">{dt('outstanding')}</p>
                 {loading ? (
                   <Skeleton variant="text" className="w-16 h-6 mt-1.5" />
                 ) : (
@@ -189,7 +420,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-[10px] sm:text-xs text-rose-600/80 font-semibold mt-2.5 truncate">
-              <span>Active credit in ledger</span>
+              <span>{dt('activeCredit')}</span>
             </p>
           </Card>
 
@@ -197,7 +428,7 @@ export default function Dashboard() {
           <Card hoverable={true} delayIdx={1} className="!p-3.5 sm:!p-5 border-l-4 border-l-blue-500 relative overflow-hidden group">
             <div className="flex justify-between items-start gap-1">
               <div className="min-w-0">
-                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Customers</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">{dt('customers')}</p>
                 {loading ? (
                   <Skeleton variant="text" className="w-12 h-6 mt-1.5" />
                 ) : (
@@ -211,7 +442,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-[10px] sm:text-xs text-blue-650 font-semibold mt-2.5 truncate">
-              <span>Total registered shop accounts</span>
+              <span>{dt('totalAccounts')}</span>
             </p>
           </Card>
 
@@ -219,7 +450,7 @@ export default function Dashboard() {
           <Card hoverable={true} delayIdx={2} className="!p-3.5 sm:!p-5 border-l-4 border-l-amber-500 relative overflow-hidden group">
             <div className="flex justify-between items-start gap-1">
               <div className="min-w-0">
-                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Today's Credit</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">{t('todaysCredit')}</p>
                 {loading ? (
                   <Skeleton variant="text" className="w-16 h-6 mt-1.5" />
                 ) : (
@@ -233,7 +464,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-[10px] sm:text-xs text-slate-400 mt-2.5 truncate">
-              Recorded in ledger
+              {dt('recordedInLedger')}
             </p>
           </Card>
 
@@ -241,7 +472,7 @@ export default function Dashboard() {
           <Card hoverable={true} delayIdx={2} className="!p-3.5 sm:!p-5 border-l-4 border-l-sky-500 relative overflow-hidden group">
             <div className="flex justify-between items-start gap-1">
               <div className="min-w-0">
-                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Today's Payments</p>
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">{t('todaysPayments')}</p>
                 {loading ? (
                   <Skeleton variant="text" className="w-16 h-6 mt-1.5" />
                 ) : (
@@ -255,7 +486,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-[10px] sm:text-xs text-sky-655 font-semibold mt-2.5 truncate">
-              Received in cash/UPI
+              {dt('receivedUPI')}
             </p>
           </Card>
         </div>
@@ -267,18 +498,18 @@ export default function Dashboard() {
 
           <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-3.5 relative z-10 w-full md:w-auto">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
-              <span>🎙️ Voice-Powered Transactions</span>
+              <span>🎙️ {dt('voiceSearch')}</span>
             </div>
-            <h3 className="text-xl md:text-2xl font-extrabold tracking-tight">Add Ledger Entries using Voice</h3>
+            <h3 className="text-xl md:text-2xl font-extrabold tracking-tight">{t('addTransactionVoice')}</h3>
             <p className="text-blue-100 text-xs md:text-sm max-w-md leading-relaxed font-semibold">
-              Speak naturally in Hindi, Hinglish, or English and get instant spoken confirmations.
+              {dt('addVoiceDescription')}
             </p>
             <div className="flex flex-col gap-1.5 text-[11px] text-blue-100 bg-white/10 p-4 rounded-2xl border border-white/5 max-w-md w-full font-bold text-left animate-slide-up">
-              <span className="text-white uppercase tracking-wider text-[9px] opacity-70">Example Command:</span>
+              <span className="text-white uppercase tracking-wider text-[9px] opacity-70">{dt('exampleCommandLabel')}</span>
               <span className="bg-white/10 px-2.5 py-1.5 rounded-xl font-mono text-white select-all">
                 "Ramesh ko 500 rupaye udhaar diya"
               </span>
-              <span className="text-white uppercase tracking-wider text-[9px] opacity-70 mt-1">Instant Spoken Confirmation:</span>
+              <span className="text-white uppercase tracking-wider text-[9px] opacity-70 mt-1">{dt('voiceConfirmationLabel')}</span>
               <span className="text-blue-200 italic font-medium">
                 📢 "Ramesh ke account mein 500 rupaye add kiye gaye hain."
               </span>
@@ -292,7 +523,7 @@ export default function Dashboard() {
             >
               <Mic size={28} className="text-blue-600 md:w-8 md:h-8" />
             </button>
-            <span className="text-[10px] sm:text-xs font-bold text-blue-55 tracking-wide uppercase">Tap to Speak</span>
+            <span className="text-[10px] sm:text-xs font-bold text-blue-55 tracking-wide uppercase">{dt('tapToSpeak')}</span>
           </div>
         </div>
 
@@ -301,15 +532,15 @@ export default function Dashboard() {
           
           {/* Quick Actions Shortcuts */}
           <div className="lg:col-span-4 space-y-4 animate-slide-up delay-3">
-            <h3 className="text-base font-bold text-slate-800">Quick Actions</h3>
+            <h3 className="text-base font-bold text-slate-800">{t('quickActions')}</h3>
             
             <Link to="/customers" className="card p-4 flex items-center gap-3.5 hover:-translate-y-0.5 transition-all bg-white">
               <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
                 <UserPlus size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-800 leading-none">Add Customer</p>
-                <p className="text-xs text-slate-400 mt-1.5">Register a new shop customer</p>
+                <p className="text-sm font-bold text-slate-800 leading-none">{dt('addCustomer')}</p>
+                <p className="text-xs text-slate-400 mt-1.5">{dt('addCustomerSub')}</p>
               </div>
               <ChevronRight size={16} className="text-slate-400" />
             </Link>
@@ -322,8 +553,8 @@ export default function Dashboard() {
                 <Mic size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-800 leading-none">Voice Search Customer</p>
-                <p className="text-xs text-slate-400 mt-1.5">Say customer name to open profile</p>
+                <p className="text-sm font-bold text-slate-800 leading-none">{dt('customerSearchTitle')}</p>
+                <p className="text-xs text-slate-400 mt-1.5">{dt('voiceSearchSub')}</p>
               </div>
               <ChevronRight size={16} className="text-slate-400" />
             </button>
@@ -333,8 +564,8 @@ export default function Dashboard() {
                 <FileText size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-800 leading-none">Customer Statements</p>
-                <p className="text-xs text-slate-400 mt-1.5">Generate and share PDF statements</p>
+                <p className="text-sm font-bold text-slate-800 leading-none">{dt('statementsTitle')}</p>
+                <p className="text-xs text-slate-400 mt-1.5">{dt('statementsSub')}</p>
               </div>
               <ChevronRight size={16} className="text-slate-400" />
             </Link>
@@ -343,9 +574,9 @@ export default function Dashboard() {
           {/* Recent Ledger List */}
           <div className="lg:col-span-8 space-y-4 animate-slide-up delay-3">
             <div className="flex justify-between items-center">
-              <h3 className="text-base font-bold text-slate-800">Recent Transactions</h3>
+              <h3 className="text-base font-bold text-slate-800">{dt('recentTransactions')}</h3>
               <Link to="/transactions" className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-0.5">
-                <span>View All History</span>
+                <span>{dt('viewAllHistory')}</span>
                 <ArrowRight size={12} />
               </Link>
             </div>
@@ -370,8 +601,8 @@ export default function Dashboard() {
                 </div>
               ) : recent.length === 0 ? (
                 <div className="py-8 text-center text-sm text-slate-400">
-                  <p>No transactions recorded yet.</p>
-                  <p className="text-xs text-slate-400/80 mt-1">Tap the microphone card above to start voice entry!</p>
+                  <p>{t('noTransactions')}</p>
+                  <p className="text-xs text-slate-400/80 mt-1">{dt('noTransactionsSub')}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100/60 px-5">
@@ -404,8 +635,8 @@ export default function Dashboard() {
       <Modal
         isOpen={showVoiceSearch}
         onClose={closeVoiceSearch}
-        title="Voice Search Customer"
-        subtitle="Speak the customer's name to open their profile"
+        title={dt('customerSearchTitle')}
+        subtitle={dt('voiceSearchSub')}
         icon={Mic}
       >
         <div className="flex flex-col items-center py-6 space-y-5 text-center">

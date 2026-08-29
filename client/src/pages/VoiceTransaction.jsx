@@ -16,16 +16,81 @@ import Badge from '../components/common/Badge.jsx';
 import Skeleton from '../components/common/Skeleton.jsx';
 import Modal from '../components/common/Modal.jsx';
 
-const speakMessage = (text) => {
+
+
+import { useTranslation } from '../context/LanguageContext';
+
+const getVoiceMessages = (langCode, customerName, amount) => {
+  const messages = {
+    en: {
+      credit: `Added ${amount} rupees to ${customerName}'s account.`,
+      payment: `Received ${amount} rupees from ${customerName}.`,
+      create: `Customer ${customerName} successfully added.`,
+      error: "Transaction failed to save. Please try again."
+    },
+    hi: {
+      credit: `${customerName} ke account mein ${amount} rupaye add kiye gaye hain.`,
+      payment: `${customerName} se ${amount} rupaye receive kiye gaye hain.`,
+      create: `${customerName} naam ka customer successfully add kar diya gaya hai.`,
+      error: "Transaction save nahi ho paya. Please dobara try karein."
+    },
+    hinglish: {
+      credit: `${customerName} ke account mein ${amount} rupaye add kiye gaye hain.`,
+      payment: `${customerName} se ${amount} rupaye receive kiye gaye hain.`,
+      create: `${customerName} naam ka customer successfully add kar diya gaya hai.`,
+      error: "Transaction save nahi ho paya. Please dobara try karein."
+    },
+    mr: {
+      credit: `${customerName} च्या खात्यात ${amount} रुपये जमा केले आहेत.`,
+      payment: `${customerName} कडून ${amount} रुपये मिळाले आहेत.`,
+      create: `${customerName} नावाचा ग्राहक यशस्वीरित्या जोडला गेला आहे.`,
+      error: "व्यवहार जतन करण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा."
+    },
+    gu: {
+      credit: `${customerName} ના ખાતામાં ${amount} રૂપિયા ઉમેરવામાં આવ્યા છે.`,
+      payment: `${customerName} પાસેથી ${amount} રૂપિયા મળ્યા છે.`,
+      create: `${customerName} નામનો ગ્રાહક સફળતાપૂર્વક ઉમેરવામાં આવ્યો છે.`,
+      error: "વ્યવહાર સાચવવામાં નિષ્ફળ. કૃપા કરીને ફરીથીપ્રયાસ કરો."
+    },
+    ta: {
+      credit: `${customerName} கணக்கில் ${amount} ரூபாய் சேர்க்கப்பட்டுள்ளது.`,
+      payment: `${customerName} இடமிருந்து ${amount} ரூபாய் பெறப்பட்டது.`,
+      create: `${customerName} என்ற வாடிக்கையாளர் வெற்றிகரமாக சேர்க்கப்பட்டார்.`,
+      error: "பரிவர்த்தனையைச் சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
+    },
+    te: {
+      credit: `${customerName} ఖాతాలో ${amount} రూపాయలు జోడించబడ్డాయి.`,
+      payment: `${customerName} నుండి ${amount} రూపాయలు స్వీకరించబడ్డాయి.`,
+      create: `${customerName} అనే కస్టమర్ విజయవంతంగా జోడించబడ్డారు.`,
+      error: "లావాదేవీని సేవ్ చేయడం విఫలమైంది. దయచేసి మళ్లీ ప్రయత్ండి."
+    },
+    bn: {
+      credit: `${customerName} এর অ্যাকাউন্টে ${amount} টাকা যোগ করা হয়েছে।`,
+      payment: `${customerName} এর কাছ থেকে ${amount} টাকা পাওয়া গেছে।`,
+      create: `${customerName} নামের গ্রাহক সফলভাবে যোগ করা হয়েছে।`,
+      error: "লেনদেন সংরক্ষণ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।"
+    },
+    pa: {
+      credit: `${customerName} ਦੇ ਖਾਤੇ ਵਿੱਚ ${amount} ਰੁਪਏ ਜੋੜ ਦਿੱਤੇ ਗਏ ਹਨ।`,
+      payment: `${customerName} ਤੋਂ ${amount} ਰੁਪਏ ਪ੍ਰਾਪਤ ਹੋਏ ਹਨ।`,
+      create: `${customerName} ਨਾਮ ਦਾ ਗਾਹਕ ਸਫਲਤਾਪੂਰਵਕ ਜੋੜਿਆ ਗਿਆ ਹੈ।`,
+      error: "ਲੈਣ-ਦੇਣ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+    }
+  };
+  return messages[langCode] || messages['en'];
+};
+
+const speakMessage = (text, langCode = 'hi') => {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   const voices = window.speechSynthesis.getVoices();
-  const hindiVoice = voices.find(
-    (v) => v.lang.toLowerCase() === 'hi-in' || v.lang.toLowerCase().startsWith('hi')
+  const targetVoice = voices.find(
+    (v) => v.lang.toLowerCase().includes(langCode.toLowerCase()) || 
+           v.lang.toLowerCase().startsWith(langCode.toLowerCase())
   );
-  if (hindiVoice) {
-    utterance.voice = hindiVoice;
+  if (targetVoice) {
+    utterance.voice = targetVoice;
   }
   window.speechSynthesis.speak(utterance);
 };
@@ -35,6 +100,7 @@ export default function VoiceTransaction() {
   const navigate = useNavigate();
   const preselected = location.state;
   const { merchant } = useAuth();
+  const { language } = useTranslation();
 
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
@@ -152,6 +218,13 @@ export default function VoiceTransaction() {
     }
   };
 
+  const getSpeakLanguage = () => {
+    if (voiceLang === 'auto') {
+      return language;
+    }
+    return voiceLang;
+  };
+
   const handleQuickCreate = async (name) => {
     try {
       const { data } = await createCustomer({ name });
@@ -159,14 +232,18 @@ export default function VoiceTransaction() {
       setSelectedCustomer(newCust);
       setSuggestions([]);
       toast.success(`Customer "${newCust.name}" created & linked! 🎉`);
-      speakMessage(`${newCust.name} naam ka customer successfully add kar diya gaya hai.`);
+      const speakLang = getSpeakLanguage();
+      const voiceMsgs = getVoiceMessages(speakLang, newCust.name);
+      speakMessage(voiceMsgs.create, speakLang);
       // Refresh local customers list
       listCustomers({ limit: 100 }).then(({ data }) => {
         setCustomers(data.data.customers);
       });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create customer');
-      speakMessage('Transaction save nahi ho paya. Please dobara try karein.');
+      const speakLang = getSpeakLanguage();
+      const voiceMsgs = getVoiceMessages(speakLang);
+      speakMessage(voiceMsgs.error, speakLang);
     }
   };
 
@@ -200,14 +277,18 @@ export default function VoiceTransaction() {
       setStep(4); // Move to Done state
       toast.success('Transaction saved and bill generated! 🎉');
       
+      const speakLang = getSpeakLanguage();
+      const voiceMsgs = getVoiceMessages(speakLang, selectedCustomer.name, extraction.amount);
       if (extraction.type === 'CREDIT') {
-        speakMessage(`${selectedCustomer.name} ke account mein ${extraction.amount} rupaye add kiye gaye hain.`);
+        speakMessage(voiceMsgs.credit, speakLang);
       } else if (extraction.type === 'PAYMENT') {
-        speakMessage(`${selectedCustomer.name} se ${extraction.amount} rupaye receive kiye gaye hain.`);
+        speakMessage(voiceMsgs.payment, speakLang);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save transaction');
-      speakMessage('Transaction save nahi ho paya. Please dobara try karein.');
+      const speakLang = getSpeakLanguage();
+      const voiceMsgs = getVoiceMessages(speakLang);
+      speakMessage(voiceMsgs.error, speakLang);
     } finally {
       setConfirming(false);
     }

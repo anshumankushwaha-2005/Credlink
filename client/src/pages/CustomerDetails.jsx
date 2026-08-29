@@ -12,11 +12,247 @@ import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
 import Badge from '../components/common/Badge.jsx';
 import Skeleton from '../components/common/Skeleton.jsx';
+import { useTranslation } from '../context/LanguageContext';
+
+const localDetailsTranslations = {
+  en: {
+    backToCustomers: "Back to Customers",
+    noPhone: "No phone number",
+    edit: "Edit",
+    add: "Add",
+    outstandingBalance: "Outstanding Balance",
+    addTransaction: "Add Transaction",
+    generateStatement: "Generate Statement",
+    generatingStatement: "Generating statement...",
+    whatsappReminder: "WhatsApp Reminder",
+    totalCreditGiven: "Total Credit Given",
+    totalPaidBack: "Total Paid Back",
+    transactionHistory: "Transaction History",
+    noTransactionsTitle: "No ledger transactions found yet.",
+    noTransactionsDesc: "Use speech recognition to log first item!",
+    creditGiven: "Credit Given",
+    paymentReceived: "Payment Received",
+    ledgerBalance: "Ledger Balance:",
+    phoneUpdated: "Phone number updated successfully! 🎉",
+    phoneFailed: "Failed to update phone number",
+    statementDownloaded: "Ledger statement downloaded! 📄",
+    statementFailed: "Failed to generate statement",
+    openingWhatsapp: "Opening WhatsApp for reminder",
+    customerNotFound: "Customer ledger not found"
+  },
+  hi: {
+    backToCustomers: "ग्राहकों पर वापस जाएं",
+    noPhone: "कोई फ़ोन नंबर नहीं",
+    edit: "बदले",
+    add: "जोड़ें",
+    outstandingBalance: "कुल बकाया राशि",
+    addTransaction: "लेन-देन जोड़ें",
+    generateStatement: "स्टेटमेंट बनाएं",
+    generatingStatement: "स्टेटमेंट बनाई जा रही है...",
+    whatsappReminder: "व्हाट्सएप रिमाइंडर",
+    totalCreditGiven: "दिया गया कुल उधार",
+    totalPaidBack: "प्राप्त कुल भुगतान",
+    transactionHistory: "लेन-देन का इतिहास",
+    noTransactionsTitle: "अभी तक कोई लेन-देन नहीं मिला।",
+    noTransactionsDesc: "पहला आइटम लॉग करने के लिए आवाज़ का उपयोग करें!",
+    creditGiven: "उधार दिया (Credit)",
+    paymentReceived: "भुगतान मिला (Payment)",
+    ledgerBalance: "खाता शेष (Balance):",
+    phoneUpdated: "फ़ोन नंबर सफलतापूर्वक बदल दिया गया! 🎉",
+    phoneFailed: "फ़ोन नंबर बदलने में विफल",
+    statementDownloaded: "खाता विवरण डाउनलोड हो गया! 📄",
+    statementFailed: "खाता विवरण बनाने में विफल",
+    openingWhatsapp: "रिमाइंडर के लिए व्हाट्सएप खोला जा रहा है",
+    customerNotFound: "ग्राहक खाता नहीं मिला"
+  },
+  hinglish: {
+    backToCustomers: "Back to Customers List",
+    noPhone: "Koi phone number nahi hai",
+    edit: "Edit",
+    add: "Add",
+    outstandingBalance: "Bakaya Balance",
+    addTransaction: "Entry Jodein",
+    generateStatement: "Statement Download Karein",
+    generatingStatement: "Statement ready ho rahi hai...",
+    whatsappReminder: "WhatsApp Reminder Send Karein",
+    totalCreditGiven: "Total Credit Given",
+    totalPaidBack: "Total Paid Back",
+    transactionHistory: "Transaction History",
+    noTransactionsTitle: "Abhi tak koi transaction nahi hua hai.",
+    noTransactionsDesc: "Speech recognition ka use karke pehla item log karein!",
+    creditGiven: "Udhaar Diya",
+    paymentReceived: "Payment Mila",
+    ledgerBalance: "Ledger Balance:",
+    phoneUpdated: "Phone number successfully update ho gaya! 🎉",
+    phoneFailed: "Phone number update karne me fail ho gaye",
+    statementDownloaded: "Statement download ho gaya! 📄",
+    statementFailed: "Statement generate nahi ho paya",
+    openingWhatsapp: "Reminder ke liye WhatsApp open ho raha hai",
+    customerNotFound: "Customer account nahi mila"
+  },
+  mr: {
+    backToCustomers: "ग्राहकांवर परत जा",
+    noPhone: "फोन नंबर नाही",
+    edit: "बदला",
+    add: "जोडा",
+    outstandingBalance: "एकूण थकीत रक्कम",
+    addTransaction: "व्यवहार जोडा",
+    generateStatement: "अहवाल तयार करा",
+    generatingStatement: "अहवाल तयार केला जात आहे...",
+    whatsappReminder: "व्हॉट्सॲप स्मरणपत्र",
+    totalCreditGiven: "दिलेली एकूण उधारी",
+    totalPaidBack: "मिळालेले एकूण पैसे",
+    transactionHistory: "व्यवहाराचा इतिहास",
+    noTransactionsTitle: "अद्याप कोणतेही व्यवहार आढळले नाहीत.",
+    noTransactionsDesc: "पहिले व्यवहार नोंदवण्यासाठी आवाज ओळख वापरा!",
+    creditGiven: "उधारी दिली (Credit)",
+    paymentReceived: "पैसे मिळाले (Payment)",
+    ledgerBalance: "खातेवही शिल्लक:",
+    phoneUpdated: "फोन नंबर यशस्वीरित्या अद्ययावत केला! 🎉",
+    phoneFailed: "फोन नंबर अद्ययावत करण्यात अयशस्वी",
+    statementDownloaded: "खातेवही अहवाल डाउनलोड केला! 📄",
+    statementFailed: "अहवाल तयार करण्यात अयशस्वी",
+    openingWhatsapp: "स्मरणपत्रासाठी व्हॉट्सॲप उघडत आहे",
+    customerNotFound: "ग्राहक खाते आढळले नाही"
+  },
+  gu: {
+    backToCustomers: "ગ્રાહકો પર પાછા જાઓ",
+    noPhone: "કોઈ ફોન નંબર નથી",
+    edit: "સુધારો",
+    add: "ઉમેરો",
+    outstandingBalance: "બાકી રકમ",
+    addTransaction: "વྱવહાર ઉમેરો",
+    generateStatement: "પત્રક બનાવો",
+    generatingStatement: "પત્રક બનાવાઈ રહ્યું છે...",
+    whatsappReminder: "વોટ્સએપ રીમાઇન્ડર",
+    totalCreditGiven: "આપેલ કુલ ક્રેડિટ",
+    totalPaidBack: "ચૂકવેલ કુલ ક્રેડિટ",
+    transactionHistory: "વ્યવહારોનો ઇતિહાસ",
+    noTransactionsTitle: "હજી સુધી કોઈ વ્યવહાર મળ્યો નથી.",
+    noTransactionsDesc: "પ્રથમ આઇટમ ઉમેરવા માટે અવાજ ઓળખનો ઉપયોગ કરો!",
+    creditGiven: "ધિરાણ આપ્યું (Credit)",
+    paymentReceived: "ચુકવણી મળી (Payment)",
+    ledgerBalance: "ખાતા વહી બાકી:",
+    phoneUpdated: "ફોન નંબર સફળતાપૂર્વક અપડેટ કરવામાં આવ્યો! 🎉",
+    phoneFailed: "ફોન નંબર અપડેટ કરવામાં નિષ્ફળ",
+    statementDownloaded: "ખાતાવહી પત્રક ડાઉનલોડ થયું! 📄",
+    statementFailed: "પત્રક બનાવવામાં નિષ્ફળ",
+    openingWhatsapp: "રીમાઇન્ડર માટે વોટ્સએપ ખોલી રહ્યાં છે",
+    customerNotFound: "ગ્રાહક ખાતાવહી મળી નથી"
+  },
+  ta: {
+    backToCustomers: "வாடிக்கையாளர்களுக்குத் திரும்பு",
+    noPhone: "தொலைபேசி எண் இல்லை",
+    edit: "தொகு",
+    add: "சேர்",
+    outstandingBalance: "நிலுவைத்தொகை",
+    addTransaction: "பரிவர்த்தனையைச் சேர்",
+    generateStatement: "அறிக்கையை உருவாக்கு",
+    generatingStatement: "அறிக்கை உருவாக்கப்படுகிறது...",
+    whatsappReminder: "வாட்ஸ்அப் நினைவூட்டல்",
+    totalCreditGiven: "வழங்கப்பட்ட மொத்த கடன்",
+    totalPaidBack: "திரும்பப் பெறப்பட்ட மொத்த பணம்",
+    transactionHistory: "பரிவர்த்தனை வரலாறு",
+    noTransactionsTitle: "இன்னும் பரிவர்த்தனைகள் எதுவும் இல்லை.",
+    noTransactionsDesc: "முதல் பரிவர்த்தனையை பதிவு செய்ய குரல் அங்கீகாரத்தைப் பயன்படுத்தவும்!",
+    creditGiven: "கடன் வழங்கப்பட்டது (Credit)",
+    paymentReceived: "பணம் பெறப்பட்டது (Payment)",
+    ledgerBalance: "கணக்கு பேரேடு நிலுவை:",
+    phoneUpdated: "தொலைபேசி எண் வெற்றிகரமாக புதுப்பிக்கப்பட்டது! 🎉",
+    phoneFailed: "தொலைபேసి எண்ணை புதுப்பிப்பதில் தோல்வி",
+    statementDownloaded: "பேரேட்டு அறிக்கை பதிவிறக்கம் செய்யப்பட்டது! 📄",
+    statementFailed: "அறிக்கையை உருவாக்குவதில் தோல்வி",
+    openingWhatsapp: "நினைவூட்டலுக்காக வாட்ஸ்அப் திறக்கப்படுகிறது",
+    customerNotFound: "வாடிக்கையாளர் பேரேடு கிடைக்கவில்லை"
+  },
+  te: {
+    backToCustomers: "కస్టమర్లకు తిరిగి వెళ్ళు",
+    noPhone: "ఫోన్ నంబర్ లేదు",
+    edit: "సవరించు",
+    add: "జోడించు",
+    outstandingBalance: "బాకీ బ్యాలెన్స్",
+    addTransaction: "లావాదేవీని జోడించు",
+    generateStatement: "స్టేట్‌మెంట్ సృష్టించు",
+    generatingStatement: "స్టేట్‌మెంట్ సృష్టించబడుతోంది...",
+    whatsappReminder: "వాట్సాప్ రిమైండర్",
+    totalCreditGiven: "ఇచ్చిన మొత్తం అప్పు",
+    totalPaidBack: "తిరిగి చెల్లించిన మొత్తం",
+    transactionHistory: "లావాదేవీల చరిత్ర",
+    noTransactionsTitle: "ఇంకా ఎలాంటి లావాదేవీలు లేవు.",
+    noTransactionsDesc: "మొదటి అంశాన్ని నమోదు చేయడానికి వాయిస్ రికగ్నిషన్‌ను ఉపయోగించండి!",
+    creditGiven: "అప్పు ఇచ్చారు (Credit)",
+    paymentReceived: "చెల్లింపు స్వీకరించారు (Payment)",
+    ledgerBalance: "ఖాతా పుస్తకం నిల్వ బ్యాలెన్స్:",
+    phoneUpdated: "ఫోన్ నంబర్ విజయవంతంగా నవీకరించబడింది! 🎉",
+    phoneFailed: "ఫోన్ నంబర్ నవీకరించడం విఫలమైంది",
+    statementDownloaded: "ఖాతా నివేదిక డౌన్‌లోడ్ చేయబడింది! 📄",
+    statementFailed: "নিవేదిక నివేదిక సృష్టించడం విఫలమైంది",
+    openingWhatsapp: "రిమైండర్ కోసం వాట్సాప్ తెరవబడుతోంది",
+    customerNotFound: "కస్టమర్ ఖాతా పుస్తకం కనుగొనబడలేదు"
+  },
+  bn: {
+    backToCustomers: "গ্রাহক তালিকায় ফিরে যান",
+    noPhone: "কোনো ফোন নম্বর নেই",
+    edit: "সম্পাদনা",
+    add: "যোগ করুন",
+    outstandingBalance: "বকেয়া ব্যালেন্স",
+    addTransaction: "লেনদেন যোগ করুন",
+    generateStatement: "বিবরণী তৈরি করুন",
+    generatingStatement: "বিবরণী তৈরি হচ্ছে...",
+    whatsappReminder: "হোয়াটসঅ্যাপ রিমাইন্ডার",
+    totalCreditGiven: "মোট ধার দেওয়া পরিমাণ",
+    totalPaidBack: "মোট ফেরত পাওয়া পরিমাণ",
+    transactionHistory: "লেনদেনের ইতিহাস",
+    noTransactionsTitle: "এখনও কোনো লেনদেন পাওয়া যায়নি।",
+    noTransactionsDesc: "প্রথম আইটেম যুক্ত করতে ভয়েস ব্যবহার করুন!",
+    creditGiven: "ধার দেওয়া হয়েছে (Credit)",
+    paymentReceived: "পরিশোধ পাওয়া গেছে (Payment)",
+    ledgerBalance: "হিসাব খাতার ব্যালেন্স:",
+    phoneUpdated: "ফোন নম্বর সফলভাবে আপডেট করা হয়েছে! 🎉",
+    phoneFailed: "ফোন নম্বর আপডেট করতে ব্যর্থ",
+    statementDownloaded: "হিসাব বিবরণী ডাউনলোড হয়েছে! 📄",
+    statementFailed: "বিবরণী তৈরি করতে ব্যর্থ",
+    openingWhatsapp: "রিমাইন্ডারের জন্য হোয়াটসঅ্যাপ খোলা হচ্ছে",
+    customerNotFound: "গ্রাহকের হিসাব পাওয়া যায়নি"
+  },
+  pa: {
+    backToCustomers: "ਗਾਹਕਾਂ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+    noPhone: "ਕੋਈ ਫੋਨ ਨੰਬਰ ਨਹੀਂ",
+    edit: "ਬਦਲੋ",
+    add: "ਜੋੜੋ",
+    outstandingBalance: "ਬਕਾਇਆ ਬੈਲੰਸ",
+    addTransaction: "ਲੈਣ-ਦੇਣ ਜੋੜੋ",
+    generateStatement: "ਸਟੇਟਮੈਂਟ ਬਣਾਓ",
+    generatingStatement: "ਸਟੇਟਮੈਂਟ ਤਿਆਰ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ...",
+    whatsappReminder: "ਵਟਸਐਪ ਰੀਮਾਈਂਡਰ",
+    totalCreditGiven: "ਦਿੱਤਾ ਗਿਆ ਕੁੱਲ ਉਧਾਰ",
+    totalPaidBack: "ਪ੍ਰਾਪਤ ਕੁੱਲ ਭੁਗਤਾਨ",
+    transactionHistory: "ਲੈਣ-ਦੇਣ ਦਾ ਇਤਿਹਾਸ",
+    noTransactionsTitle: "ਅਜੇ ਤੱਕ ਕੋਈ ਲੈਣ-ਦੇਣ ਨਹੀਂ ਮਿਲਿਆ।",
+    noTransactionsDesc: "ਪਹਿਲੀ ਚੀਜ਼ ਦਰਜ ਕਰਨ ਲਈ ਆਵਾਜ਼ ਦੀ ਵਰਤੋਂ ਕਰੋ!",
+    creditGiven: "ਉਧਾਰ ਦਿੱਤਾ (Credit)",
+    paymentReceived: "ਭੁਗਤਾਨ ਮਿਲਿਆ (Payment)",
+    ledgerBalance: "ਖਾਤਾ ਵਹੀ ਬੈਲੰਸ:",
+    phoneUpdated: "ਫੋਨ ਨੰਬਰ ਸਫਲਤਾਪੂਰਵਕ ਅਪਡੇਟ ਹੋ ਗਿਆ! 🎉",
+    phoneFailed: "ਫੋਨ ਨੰਬਰ ਅਪਡੇਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲ",
+    statementDownloaded: "ਖਾਤਾ ਸਟੇਟਮੈਂਟ ਡਾਊਨਲੋਡ ਹੋ ਗਈ! 📄",
+    statementFailed: "ਸਟੇਟਮੈਂਟ ਬਣਾਉਣ ਵਿੱਚ ਅਸਫਲ",
+    openingWhatsapp: "ਰੀਮਾਈਂਡਰ ਲਈ ਵਟਸਐਪ ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ",
+    customerNotFound: "ਗਾਹਕ ਖਾਤਾ ਨਹੀਂ ਲੱਭਿਆ"
+  }
+};
 
 export default function CustomerDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { merchant } = useAuth();
+  const { language } = useTranslation();
+
+  const lt = (key) => {
+    const dict = localDetailsTranslations[language] || localDetailsTranslations['en'];
+    return dict[key] || localDetailsTranslations['en'][key] || key;
+  };
+
   const [customer, setCustomer] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState(null);
@@ -33,7 +269,7 @@ export default function CustomerDetails() {
       setTransactions(data.data.transactions);
       setSummary(data.data.summary);
     } catch (err) {
-      toast.error('Customer ledger not found');
+      toast.error(lt('customerNotFound'));
       navigate('/customers');
     } finally {
       setLoading(false);
@@ -48,9 +284,9 @@ export default function CustomerDetails() {
     setGenerating(true);
     try {
       await downloadCustomerStatement(id, {}, `Statement-${customer.name}.pdf`);
-      toast.success('Ledger statement downloaded! 📄');
+      toast.success(lt('statementDownloaded'));
     } catch (err) {
-      toast.error('Failed to generate statement');
+      toast.error(lt('statementFailed'));
     } finally {
       setGenerating(false);
     }
@@ -62,9 +298,9 @@ export default function CustomerDetails() {
       const { data } = await updateCustomer(id, { phone: tempPhone });
       setCustomer(data.data.customer);
       setIsEditingPhone(false);
-      toast.success('Phone number updated successfully! 🎉');
+      toast.success(lt('phoneUpdated'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update phone number');
+      toast.error(err.response?.data?.message || lt('phoneFailed'));
     }
   };
 
@@ -74,7 +310,7 @@ export default function CustomerDetails() {
     const encoded = encodeURIComponent(message);
     const url = `https://wa.me/${customer.phone || ''}?text=${encoded}`;
     window.open(url, '_blank');
-    toast.success('Opening WhatsApp for reminder');
+    toast.success(lt('openingWhatsapp'));
   };
 
   if (loading || !customer) {
@@ -105,7 +341,7 @@ export default function CustomerDetails() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
           >
             <ArrowLeft size={14} className="stroke-[3]" />
-            <span>Back to Customers</span>
+            <span>{lt('backToCustomers')}</span>
           </button>
         </div>
 
@@ -134,7 +370,7 @@ export default function CustomerDetails() {
                       <button
                         type="submit"
                         className="bg-blue-650 hover:bg-blue-750 text-white rounded-lg p-1 transition-all active:scale-90"
-                        title="Save"
+                        title={lt('edit')}
                       >
                         <Check size={10} className="stroke-[3]" />
                       </button>
@@ -142,7 +378,7 @@ export default function CustomerDetails() {
                         type="button"
                         onClick={() => setIsEditingPhone(false)}
                         className="bg-white hover:bg-slate-100 text-slate-500 border border-slate-200 rounded-lg p-1 transition-all active:scale-90"
-                        title="Cancel"
+                        title={lt('backToCustomers')}
                       >
                         <X size={10} className="stroke-[3]" />
                       </button>
@@ -151,7 +387,7 @@ export default function CustomerDetails() {
                     <div className="flex items-center gap-1">
                       <span className="flex items-center gap-1">
                         <Phone size={12} />
-                        {customer.phone || 'No phone number'}
+                        {customer.phone || lt('noPhone')}
                       </span>
                       <button
                         onClick={() => {
@@ -160,7 +396,7 @@ export default function CustomerDetails() {
                         }}
                         className="text-[9px] text-blue-600 hover:text-blue-800 font-extrabold uppercase ml-1.5 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-lg tracking-wider active:scale-95 transition-all"
                       >
-                        {customer.phone ? 'Edit' : 'Add'}
+                        {customer.phone ? lt('edit') : lt('add')}
                       </button>
                     </div>
                   )}
@@ -176,7 +412,7 @@ export default function CustomerDetails() {
 
             {/* Balances detail */}
             <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl w-full sm:w-auto text-right flex sm:flex-col justify-between items-center sm:items-end gap-2">
-              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Outstanding Balance</span>
+              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{lt('outstandingBalance')}</span>
               <span className={`text-2xl font-extrabold ${isOutstanding ? 'text-rose-600' : 'text-sky-600'} tracking-tight`}>
                 {formatCurrency(customer.currentBalance)}
               </span>
@@ -191,7 +427,7 @@ export default function CustomerDetails() {
               state={{ customerId: customer._id, customerName: customer.name }}
             >
               <Button size="sm" icon={Mic} className="shadow-md shadow-blue-500/10">
-                Add Transaction
+                {lt('addTransaction')}
               </Button>
             </Link>
             
@@ -202,7 +438,7 @@ export default function CustomerDetails() {
               disabled={generating} 
               icon={FileText}
             >
-              {generating ? 'Generating statement...' : 'Generate Statement'}
+              {generating ? lt('generatingStatement') : lt('generateStatement')}
             </Button>
 
             <Button 
@@ -212,7 +448,7 @@ export default function CustomerDetails() {
               icon={MessageCircle}
               className="!text-sky-650 hover:bg-sky-50/30"
             >
-              WhatsApp Reminder
+              {lt('whatsappReminder')}
             </Button>
           </div>
         </Card>
@@ -222,7 +458,7 @@ export default function CustomerDetails() {
           <Card hoverable={true} delayIdx={1} className="border-l-4 border-l-rose-500 bg-white">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Credit Given</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{lt('totalCreditGiven')}</p>
                 <p className="text-lg font-extrabold text-rose-600 mt-1">{formatCurrency(summary?.totalCredit || 0)}</p>
               </div>
               <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 border border-rose-100/50 flex items-center justify-center">
@@ -234,7 +470,7 @@ export default function CustomerDetails() {
           <Card hoverable={true} delayIdx={1} className="border-l-4 border-l-sky-500 bg-white">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Paid Back</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{lt('totalPaidBack')}</p>
                 <p className="text-lg font-extrabold text-sky-600 mt-1">{formatCurrency(summary?.totalPayment || 0)}</p>
               </div>
               <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-500 border border-sky-100/50 flex items-center justify-center">
@@ -246,13 +482,13 @@ export default function CustomerDetails() {
 
         {/* Timeline Transaction History */}
         <div className="space-y-4">
-          <h3 className="text-base font-bold text-slate-800 animate-slide-up delay-2">Transaction History</h3>
+          <h3 className="text-base font-bold text-slate-800 animate-slide-up delay-2">{lt('transactionHistory')}</h3>
 
           {transactions.length === 0 ? (
             <Card hoverable={false} animate={true} delayIdx={2} className="text-center py-12 bg-white">
               <Clock size={32} className="text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-400 font-medium">No ledger transactions found yet.</p>
-              <p className="text-xs text-slate-400/80 mt-0.5">Use speech recognition to log first item!</p>
+              <p className="text-sm text-slate-400 font-medium">{lt('noTransactionsTitle')}</p>
+              <p className="text-xs text-slate-400/80 mt-0.5">{lt('noTransactionsDesc')}</p>
             </Card>
           ) : (
             /* Custom Timeline cards structure */
@@ -273,7 +509,7 @@ export default function CustomerDetails() {
                         <div>
                           {/* Transaction note / transcript */}
                           <p className="text-sm font-bold text-slate-800 leading-snug">
-                            {tx.description || tx.transcript || (isCredit ? 'Credit Given' : 'Payment Received')}
+                            {tx.description || tx.transcript || (isCredit ? lt('creditGiven') : lt('paymentReceived'))}
                           </p>
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                             <span>{formatDateTime(tx.createdAt)}</span>
@@ -292,7 +528,7 @@ export default function CustomerDetails() {
 
                       {/* Timeline Ledger state reference */}
                       <div className="mt-3.5 pt-3.5 border-t border-slate-100/60 flex items-center justify-between text-xs font-semibold text-slate-500 bg-slate-50/50 p-2.5 rounded-xl border border-slate-50">
-                        <span>Ledger Balance:</span>
+                        <span>{lt('ledgerBalance')}</span>
                         <strong className="text-slate-800">{formatCurrency(tx.balanceAfter)}</strong>
                       </div>
                     </Card>
