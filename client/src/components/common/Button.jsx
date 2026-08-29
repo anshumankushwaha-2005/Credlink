@@ -42,7 +42,7 @@ export default function Button({
         </svg>
       )}
       {!loading && Icon && <Icon size={size === 'sm' ? 14 : size === 'lg' ? 18 : 16} />}
-      <span>{children}</span>
+      {children}
     </button>
   );
 }
