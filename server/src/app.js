@@ -61,6 +61,50 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.get('/api/debug-status', async (req, res) => {
+  const nodemailer = require('nodemailer');
+  const mongoose = require('mongoose');
+  
+  const debug = {
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      CLIENT_URL: process.env.CLIENT_URL,
+      SMTP_USER: process.env.SMTP_USER,
+      SMTP_PASS_EXISTS: !!process.env.SMTP_PASS,
+      SMTP_PASS_LENGTH: process.env.SMTP_PASS ? process.env.SMTP_PASS.length : 0,
+      GROQ_API_KEY_EXISTS: !!process.env.GROQ_API_KEY,
+      isEmailConfigured: env.isEmailConfigured,
+    },
+    mongodb: {
+      state: mongoose.connection.readyState, // 1 = connected
+      host: mongoose.connection.host,
+    },
+    smtp: {
+      status: 'untested',
+      error: null
+    }
+  };
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+    await transporter.verify();
+    debug.smtp.status = 'verified';
+  } catch (err) {
+    debug.smtp.status = 'failed';
+    debug.smtp.error = err.message;
+  }
+
+  res.json(debug);
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/transactions', transactionRoutes);
