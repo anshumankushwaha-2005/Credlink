@@ -77,8 +77,13 @@ export default function VoiceTransaction() {
   const handleAudioUpload = async (blob) => {
     setTranscribing(true);
     try {
+      const mime = blob.type || 'audio/webm';
+      const parts = mime.split(';')[0].split('/');
+      let ext = parts[1] || 'webm';
+      if (ext === 'mpeg' || ext === 'mpga') ext = 'mp3';
+
       const formData = new FormData();
-      formData.append('audio', blob, 'recording.webm');
+      formData.append('audio', blob, `recording.${ext}`);
       formData.append('language', voiceLang);
       
       const { data } = await transcribeVoice(formData);

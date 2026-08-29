@@ -94,8 +94,13 @@ export default function Dashboard() {
     setSearchTranscribing(true);
     setSuggestions([]);
     try {
+      const mime = blob.type || 'audio/webm';
+      const parts = mime.split(';')[0].split('/');
+      let ext = parts[1] || 'webm';
+      if (ext === 'mpeg' || ext === 'mpga') ext = 'mp3';
+
       const formData = new FormData();
-      formData.append('audio', blob, 'search.webm');
+      formData.append('audio', blob, `search.${ext}`);
       
       const { data } = await searchCustomerVoice(formData);
       const customer = data.data.customer;

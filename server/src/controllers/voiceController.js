@@ -15,6 +15,8 @@ async function transcribeVoice(req, res, next) {
       return fail(res, 'No audio file provided.', 400);
     }
 
+    console.log('[DEBUG] Uploaded audio file size:', req.file.size, 'bytes, mimetype:', req.file.mimetype, 'name:', req.file.originalname);
+
     const { language } = req.body;
 
     // Construct multipart form data for Groq Whisper transcription API
