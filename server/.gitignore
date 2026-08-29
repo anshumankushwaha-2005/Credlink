@@ -1,0 +1,6 @@
+node_modules/
+.env
+generated/
+!generated/bills/.gitkeep
+*.log
+.DS_Store
