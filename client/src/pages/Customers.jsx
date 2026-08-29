@@ -13,6 +13,20 @@ import EmptyState from '../components/common/EmptyState.jsx';
 import Skeleton from '../components/common/Skeleton.jsx';
 import Modal from '../components/common/Modal.jsx';
 
+const speakMessage = (text) => {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = window.speechSynthesis.getVoices();
+  const hindiVoice = voices.find(
+    (v) => v.lang.toLowerCase() === 'hi-in' || v.lang.toLowerCase().startsWith('hi')
+  );
+  if (hindiVoice) {
+    utterance.voice = hindiVoice;
+  }
+  window.speechSynthesis.speak(utterance);
+};
+
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
@@ -52,11 +66,13 @@ export default function Customers() {
     try {
       await createCustomer(form);
       toast.success('Customer added successfully! 🎉');
+      speakMessage(`${form.name} naam ka customer successfully add kar diya gaya hai.`);
       setShowModal(false);
       setForm({ name: '', phone: '', address: '' });
       fetchCustomers(search);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to add customer');
+      speakMessage('Transaction save nahi ho paya. Please dobara try karein.');
     } finally {
       setSaving(false);
     }

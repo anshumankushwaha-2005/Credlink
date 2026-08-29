@@ -16,6 +16,20 @@ import Badge from '../components/common/Badge.jsx';
 import Skeleton from '../components/common/Skeleton.jsx';
 import Modal from '../components/common/Modal.jsx';
 
+const speakMessage = (text) => {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = window.speechSynthesis.getVoices();
+  const hindiVoice = voices.find(
+    (v) => v.lang.toLowerCase() === 'hi-in' || v.lang.toLowerCase().startsWith('hi')
+  );
+  if (hindiVoice) {
+    utterance.voice = hindiVoice;
+  }
+  window.speechSynthesis.speak(utterance);
+};
+
 export default function VoiceTransaction() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -145,12 +159,14 @@ export default function VoiceTransaction() {
       setSelectedCustomer(newCust);
       setSuggestions([]);
       toast.success(`Customer "${newCust.name}" created & linked! 🎉`);
+      speakMessage(`${newCust.name} naam ka customer successfully add kar diya gaya hai.`);
       // Refresh local customers list
       listCustomers({ limit: 100 }).then(({ data }) => {
         setCustomers(data.data.customers);
       });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create customer');
+      speakMessage('Transaction save nahi ho paya. Please dobara try karein.');
     }
   };
 
@@ -183,8 +199,15 @@ export default function VoiceTransaction() {
       setResult(data.data);
       setStep(4); // Move to Done state
       toast.success('Transaction saved and bill generated! 🎉');
+      
+      if (extraction.type === 'CREDIT') {
+        speakMessage(`${selectedCustomer.name} ke account mein ${extraction.amount} rupaye add kiye gaye hain.`);
+      } else if (extraction.type === 'PAYMENT') {
+        speakMessage(`${selectedCustomer.name} se ${extraction.amount} rupaye receive kiye gaye hain.`);
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save transaction');
+      speakMessage('Transaction save nahi ho paya. Please dobara try karein.');
     } finally {
       setConfirming(false);
     }
