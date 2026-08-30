@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, ChevronRight, X, Phone, User, MapPin } from 'lucide-react';
+import { Plus, Search, ChevronRight, X, Phone, User, MapPin, Camera, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Layout from '../components/layout/Layout.jsx';
-import { listCustomers, createCustomer } from '../services/customerService';
+import { listCustomers, createCustomer, uploadCustomerPhoto } from '../services/customerService';
 import { formatCurrency } from '../utils/formatCurrency';
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
@@ -98,7 +98,9 @@ const localCustomerTranslations = {
     noPhone: "No phone",
     requiredError: "Customer name is required",
     successMsg: "Customer added successfully! 🎉",
-    failedMsg: "Failed to add customer"
+    failedMsg: "Failed to add customer",
+    uploadPhoto: "Upload Photo",
+    removePhoto: "Remove"
   },
   hi: {
     shopCustomers: "ग्राहक सूची",
@@ -123,7 +125,9 @@ const localCustomerTranslations = {
     noPhone: "कोई फ़ोन नहीं",
     requiredError: "ग्राहक का नाम आवश्यक है",
     successMsg: "ग्राहक सफलतापूर्वक जोड़ दिया गया है! 🎉",
-    failedMsg: "ग्राहक जोड़ने में विफल"
+    failedMsg: "ग्राहक जोड़ने में विफल",
+    uploadPhoto: "फ़ोटो अपलोड करें",
+    removePhoto: "हटाएं"
   },
   hinglish: {
     shopCustomers: "Customers List",
@@ -148,7 +152,9 @@ const localCustomerTranslations = {
     noPhone: "No phone number",
     requiredError: "Customer ka naam likhna compulsory hai",
     successMsg: "Customer successfully add ho gaya! 🎉",
-    failedMsg: "Customer add karne me fail ho gaye"
+    failedMsg: "Customer add karne me fail ho gaye",
+    uploadPhoto: "Photo Upload",
+    removePhoto: "Remove"
   },
   mr: {
     shopCustomers: "ग्राहक",
@@ -173,7 +179,9 @@ const localCustomerTranslations = {
     noPhone: "फोन नाही",
     requiredError: "ग्राहकाचे नाव आवश्यक आहे",
     successMsg: "ग्राहक यशस्वीरित्या जोडला गेला! 🎉",
-    failedMsg: "ग्राहक जोडण्यात अयशस्वी"
+    failedMsg: "ग्राहक जोडण्यात अयशस्वी",
+    uploadPhoto: "फोटो अपलोड करा",
+    removePhoto: "काढून टाका"
   },
   gu: {
     shopCustomers: "ગ્રાહકો",
@@ -198,7 +206,9 @@ const localCustomerTranslations = {
     noPhone: "કોઈ ફોન નથી",
     requiredError: "ગ્રાહકનું નામ જરૂરી છે",
     successMsg: "ગ્રાહક સફળતાપૂર્વક ઉમેરવામાં આવ્યો! 🎉",
-    failedMsg: "ગ્રાહક ઉમેરવામાં નિષ્ફળ"
+    failedMsg: "ગ્રાહક ઉમેરવામાં નિષ્ફળ",
+    uploadPhoto: "ફોટો અપલોડ કરો",
+    removePhoto: "દૂર કરો"
   },
   ta: {
     shopCustomers: "வாடிக்கையாளர்கள்",
@@ -212,22 +222,24 @@ const localCustomerTranslations = {
     balance: "நிலுவைத்தொகை",
     viewDetails: "விவரங்களைப் பார்",
     addCustomerModalTitle: "வாடிக்கையாளரைச் சேர்",
-    addCustomerModalSub: "கடன் பேரேட்டைப் பதிவு செய்ய வாடிக்கையாளரை பதிவு செய்யவும்",
+    addCustomerModalSub: "கடன் பேరేட்டைப் பதிவு செய்ய வாடிக்கையாளரை பதிவு செய்யவும்",
     customerNameLabel: "வாடிக்கையாளர் பெயர் *",
     customerNamePlaceholder: "பெயரை உள்ளிடவும் (எ.கா. ரமேஷ் குமார்)",
     phoneLabel: "தொலைபேசி / வாட்ஸ்அப் எண்",
-    phonePlaceholder: "10 இலக்க மொபைல் (எ.கா. 9812345678)",
+    phonePlaceholder: "10-இலக்க மொபைல் (எ.கா. 9812345678)",
     addressLabel: "முகவரி (விருப்பத்திற்குரியது)",
     addressPlaceholder: "கடை/வீட்டு முகவரியை உள்ளிடவும்",
-    saveCustomerBtn: "தகவலைச் சேமிக்கவும்",
+    saveCustomerBtn: "தகவலைச் சேਮੀக்கவும்",
     noPhone: "தொலைபேசி இல்லை",
     requiredError: "வாடிக்கையாளர் பெயர் தேவை",
     successMsg: "வாடிக்கையாளர் வெற்றிகரமாக சேர்க்கப்பட்டார்! 🎉",
-    failedMsg: "வாடிக்கையாளரைச் சேர்ப்பதில் தோல்வி"
+    failedMsg: "வாடிக்கையாளரைச் சேர்ப்பதில் தோல்வி",
+    uploadPhoto: "புகைப்படத்தைப் பதிவேற்றவும்",
+    removePhoto: "நீக்கவும்"
   },
   te: {
     shopCustomers: "కస్టమర్లు",
-    manageLedger: "మీ కస్టమర్ క్రెడిట్ లెడ్జర్‌ను సులభంగా నిర్వహించండి.",
+    manageLedger: "మీ కస్టమర్ క్రెడిట్ లెడ్జర్‌ను సులभంగా నిర్వహించండి.",
     searchPlaceholder: "పేరు లేదా ఫోన్ ద్వారా కస్టమర్‌ను వెతకండి...",
     noCustomersTitle: "ఇంకా కస్టమర్లు లేరు",
     noCustomersDesc: "మీ మొదటి కస్టమర్‌ను జోడించి, వాయిస్ లేదా మ్యాన్యువల్ లాగ్‌ల ద్వారా అప్పును ట్రాక్ చేయడం ప్రారంభించండి.",
@@ -241,14 +253,16 @@ const localCustomerTranslations = {
     customerNameLabel: "కస్టమర్ పేరు *",
     customerNamePlaceholder: "పేరు నమోదు చేయండి (ఉదా. రమేష్ కుమార్)",
     phoneLabel: "ఫోన్ / వాట్సాప్ నంబర్",
-    phonePlaceholder: "10-అంకెల మొబైల్ (ఉదా. 9812345678)",
+    phonePlaceholder: "10-అంకెర మొబైల్ (ఉదా. 9812345678)",
     addressLabel: "చిరునామా (ఐచ్ఛికం)",
     addressPlaceholder: "షాప్/నివాస చిరునామా నమోదు చేయండి",
     saveCustomerBtn: "కస్టమర్ సమాచారాన్ని సేవ్ చేయి",
     noPhone: "ఫోన్ లేదు",
     requiredError: "కస్టమర్ పేరు అవసరం",
     successMsg: "కస్టమర్ విజయవంతంగా జోడించబడ్డారు! 🎉",
-    failedMsg: "కస్టమర్‌ను జోడించడంలో విఫలమైంది"
+    failedMsg: "కస్టమర్‌ను జోడించడంలో విఫలమైంది",
+    uploadPhoto: "ఫోటోను అప్‌లోడ్ చేయండి",
+    removePhoto: "తొలగించండి"
   },
   bn: {
     shopCustomers: "গ্রাহকগণ",
@@ -273,7 +287,9 @@ const localCustomerTranslations = {
     noPhone: "কোনো ফোন নেই",
     requiredError: "গ্রাহকের নাম আবশ্যক",
     successMsg: "গ্রাহক সফলভাবে যোগ করা হয়েছে! 🎉",
-    failedMsg: "গ্রাহক যোগ করতে ব্যর্থ"
+    failedMsg: "গ্রাহক যোগ করতে ব্যর্থ",
+    uploadPhoto: "ছবি আপলোড করুন",
+    removePhoto: "মুছে ফেলুন"
   },
   pa: {
     shopCustomers: "ਗਾਹਕ",
@@ -298,7 +314,9 @@ const localCustomerTranslations = {
     noPhone: "ਕੋਈ ਫੋਨ ਨਹੀਂ",
     requiredError: "ਗਾਹਕ ਦਾ ਨਾਮ ਜ਼ਰੂਰੀ ਹੈ",
     successMsg: "ਗਾਹਕ ਸਫਲਤਾਪੂਰਵਕ ਜੋੜਿਆ ਗਿਆ! 🎉",
-    failedMsg: "ਗਾਹਕ ਜੋੜਨ ਵਿੱਚ ਅਸਫਲ"
+    failedMsg: "ਗਾਹਕ ਜੋੜਨ ਵਿੱਚ ਅਸਫਲ",
+    uploadPhoto: "ਫੋਟੋ ਅਪਲੋਡ ਕਰੋ",
+    removePhoto: "ਹਟਾਓ"
   }
 };
 
@@ -322,13 +340,33 @@ export default function Customers() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ name: '', phone: '', address: '' });
+  const [form, setForm] = useState({ name: '', phone: '', address: '', profilePhoto: '' });
   const [saving, setSaving] = useState(false);
   const { language } = useTranslation();
   
   const ct = (key) => {
     const dict = localCustomerTranslations[language] || localCustomerTranslations['en'];
     return dict[key] || localCustomerTranslations['en'][key] || key;
+  };
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('File size exceeds 2MB limit');
+        return;
+      }
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setSelectedFile(null);
+    setPreviewUrl('');
   };
 
   const fetchCustomers = async (searchTerm = '') => {
@@ -360,12 +398,26 @@ export default function Customers() {
     }
     setSaving(true);
     try {
-      await createCustomer(form);
+      let profilePhotoPath = '';
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('profilePhoto', selectedFile);
+        const { data } = await uploadCustomerPhoto(formData);
+        profilePhotoPath = data.data.profilePhoto;
+      }
+
+      await createCustomer({
+        ...form,
+        profilePhoto: profilePhotoPath
+      });
+
       toast.success(ct('successMsg'));
       const voiceMsgs = getVoiceMessages(language, form.name);
       speakMessage(voiceMsgs.create, language);
       setShowModal(false);
-      setForm({ name: '', phone: '', address: '' });
+      setForm({ name: '', phone: '', address: '', profilePhoto: '' });
+      setSelectedFile(null);
+      setPreviewUrl('');
       fetchCustomers(search);
     } catch (err) {
       toast.error(err.response?.data?.message || ct('failedMsg'));
@@ -438,9 +490,17 @@ export default function Customers() {
                     {/* Header info */}
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-sm text-slate-600">
-                          {c.name.charAt(0).toUpperCase()}
-                        </div>
+                        {c.profilePhoto ? (
+                          <img
+                            src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${c.profilePhoto}`}
+                            alt={c.name}
+                            className="w-10 h-10 rounded-full object-cover border border-slate-100"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-sm text-slate-600">
+                            {c.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <div className="min-w-0">
                           <h4 className="font-bold text-slate-800 text-sm truncate leading-tight group-hover:text-blue-600 transition-colors">{c.name}</h4>
                           <span className="text-[10px] text-slate-450 mt-1 flex items-center gap-1">
@@ -486,12 +546,56 @@ export default function Customers() {
       {/* Add Customer Modal Overlay */}
       <Modal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          setForm({ name: '', phone: '', address: '', profilePhoto: '' });
+          setSelectedFile(null);
+          setPreviewUrl('');
+        }}
         title={ct('addCustomerModalTitle')}
         subtitle={ct('addCustomerModalSub')}
         icon={Plus}
       >
         <form onSubmit={handleCreate} className="space-y-4 pt-2">
+          {/* Profile Photo Upload Field */}
+          <div className="flex flex-col space-y-2 pb-2">
+            <label className="text-xs font-bold text-slate-500">{ct('uploadPhoto')}</label>
+            <div className="flex items-center gap-4 w-full">
+              <div className="relative group w-14 h-14 shrink-0 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <Camera className="w-5 h-5 text-slate-400" />
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+                <div className="flex gap-2">
+                  <label className="btn-secondary !py-2 !px-3 text-xs font-bold cursor-pointer hover:bg-slate-100 flex items-center gap-1.5 border border-slate-250 rounded-xl">
+                    <Upload size={13} />
+                    <span>Choose Photo</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {previewUrl && (
+                    <button
+                      type="button"
+                      onClick={handleRemovePhoto}
+                      className="btn-danger-secondary !py-2 !px-3 text-xs font-bold hover:bg-rose-50 hover:text-rose-600 flex items-center gap-1 border border-rose-100 rounded-xl"
+                    >
+                      <X size={13} />
+                      <span>{ct('removePhoto')}</span>
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-slate-400">Max size: 2MB. JPG, PNG formats only.</p>
+              </div>
+            </div>
+          </div>
+
           <Input
             label={ct('customerNameLabel')}
             placeholder={ct('customerNamePlaceholder')}

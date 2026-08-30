@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Mic, FileText, MessageCircle, Phone, MapPin, TrendingUp, TrendingDown, Clock, Check, X } from 'lucide-react';
+import { ArrowLeft, Mic, FileText, MessageCircle, Phone, MapPin, TrendingUp, TrendingDown, Clock, Check, X, Camera } from 'lucide-react';
 import Layout from '../components/layout/Layout.jsx';
 import { useAuth } from '../hooks/useAuth';
-import { getCustomer, updateCustomer } from '../services/customerService';
+import { getCustomer, updateCustomer, uploadCustomerPhoto } from '../services/customerService';
 import { downloadCustomerStatement } from '../services/reportService';
 import { formatCurrency } from '../utils/formatCurrency';
 import { formatDateTime } from '../utils/formatDate';
@@ -260,6 +260,48 @@ export default function CustomerDetails() {
   const [generating, setGenerating] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [tempPhone, setTempPhone] = useState('');
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('File size exceeds 2MB limit');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    const formData = new FormData();
+    formData.append('profilePhoto', file);
+
+    try {
+      const { data: uploadRes } = await uploadCustomerPhoto(formData);
+      const newPhotoPath = uploadRes.data.profilePhoto;
+
+      const { data: updateRes } = await updateCustomer(id, { profilePhoto: newPhotoPath });
+      setCustomer(updateRes.data.customer);
+      toast.success('Profile photo updated successfully! 📸');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handlePhotoRemove = async () => {
+    if (!window.confirm('Are you sure you want to remove this profile photo?')) return;
+    setUploadingPhoto(true);
+    try {
+      const { data } = await updateCustomer(id, { profilePhoto: '' });
+      setCustomer(data.data.customer);
+      toast.success('Profile photo removed! 🗑️');
+    } catch (err) {
+      toast.error('Failed to remove profile photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -351,8 +393,28 @@ export default function CustomerDetails() {
             
             {/* Identity details */}
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center font-bold text-lg text-blue-700">
-                {customer.name.charAt(0).toUpperCase()}
+              <div className="relative group w-14 h-14 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                {customer.profilePhoto ? (
+                  <img
+                    src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${customer.profilePhoto}`}
+                    alt={customer.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="font-extrabold text-lg text-blue-700">{customer.name.charAt(0).toUpperCase()}</span>
+                )}
+                {/* Image upload overlay */}
+                <label className="absolute inset-0 bg-slate-900/40 rounded-full flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera size={14} className="text-white mb-0.5" />
+                  <span className="text-[8px] text-white font-extrabold uppercase tracking-wider">{uploadingPhoto ? '...' : 'Edit'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    disabled={uploadingPhoto}
+                    className="hidden"
+                  />
+                </label>
               </div>
               <div>
                 <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">{customer.name}</h2>
@@ -405,6 +467,15 @@ export default function CustomerDetails() {
                       <MapPin size={12} />
                       {customer.address}
                     </span>
+                  )}
+                  {customer.profilePhoto && (
+                    <button
+                      onClick={handlePhotoRemove}
+                      disabled={uploadingPhoto}
+                      className="text-[9px] text-rose-600 hover:text-rose-800 font-extrabold uppercase ml-1 bg-rose-50/50 hover:bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded-lg tracking-wider active:scale-95 transition-all"
+                    >
+                      Remove Photo
+                    </button>
                   )}
                 </div>
               </div>

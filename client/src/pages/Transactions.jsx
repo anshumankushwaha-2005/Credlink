@@ -335,9 +335,17 @@ export default function Transactions() {
                     {/* Header info */}
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-xs text-slate-600">
-                          {tx.customerId?.name ? tx.customerId.name.charAt(0).toUpperCase() : 'U'}
-                        </div>
+                        {tx.customerId?.profilePhoto ? (
+                          <img
+                            src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${tx.customerId.profilePhoto}`}
+                            alt={tx.customerId.name}
+                            className="w-9 h-9 rounded-full object-cover border border-slate-100"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-xs text-slate-600">
+                            {tx.customerId?.name ? tx.customerId.name.charAt(0).toUpperCase() : 'U'}
+                          </div>
+                        )}
                         <div>
                           <p className="font-bold text-slate-800 text-sm leading-tight">{tx.customerId?.name || tt('unknown')}</p>
                           <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-wider">{formatDateTime(tx.createdAt)}</p>

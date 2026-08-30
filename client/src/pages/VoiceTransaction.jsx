@@ -394,9 +394,17 @@ export default function VoiceTransaction() {
               {selectedCustomer ? (
                 <div className="flex items-center justify-between bg-blue-50/50 rounded-2xl p-4 border border-blue-100/50">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
-                      {selectedCustomer.name.charAt(0).toUpperCase()}
-                    </div>
+                    {selectedCustomer.profilePhoto ? (
+                      <img
+                        src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${selectedCustomer.profilePhoto}`}
+                        alt={selectedCustomer.name}
+                        className="w-10 h-10 rounded-full object-cover border border-slate-100"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
+                        {selectedCustomer.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <p className="font-bold text-slate-800 text-sm">{selectedCustomer.name}</p>
                       <p className="text-xs text-slate-450 mt-0.5">{selectedCustomer.phone || 'No phone'}</p>

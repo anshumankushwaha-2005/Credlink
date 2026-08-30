@@ -12,6 +12,7 @@ const customerSchema = new mongoose.Schema(
     phone: { type: String, trim: true },
     whatsappNumber: { type: String, trim: true },
     address: { type: String, trim: true },
+    profilePhoto: { type: String, trim: true },
     currentBalance: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },

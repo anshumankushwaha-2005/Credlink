@@ -609,9 +609,17 @@ export default function Dashboard() {
                   {recent.map((tx) => (
                     <div key={tx._id} className="py-3.5 flex items-center justify-between gap-3 hover:bg-slate-50/50 px-2 rounded-xl transition-colors">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 border border-slate-100 font-bold text-xs shrink-0">
-                          {tx.customerId?.name ? tx.customerId.name.charAt(0).toUpperCase() : 'U'}
-                        </div>
+                        {tx.customerId?.profilePhoto ? (
+                          <img
+                            src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${tx.customerId.profilePhoto}`}
+                            alt={tx.customerId.name}
+                            className="w-9 h-9 rounded-full object-cover border border-slate-100 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 border border-slate-100 font-bold text-xs shrink-0">
+                            {tx.customerId?.name ? tx.customerId.name.charAt(0).toUpperCase() : 'U'}
+                          </div>
+                        )}
                         <div className="min-w-0">
                           <p className="font-bold text-slate-800 text-sm truncate leading-tight">{tx.customerId?.name || 'Unknown Customer'}</p>
                           <p className="text-[10px] text-slate-450 mt-1 truncate">{formatDateTime(tx.createdAt)} · Receipt #{tx.receiptNumber}</p>

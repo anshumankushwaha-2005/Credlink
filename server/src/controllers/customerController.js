@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const Customer = require('../models/Customer');
 const Transaction = require('../models/Transaction');
 const { ok, fail } = require('../utils/response');
@@ -101,6 +103,7 @@ async function createCustomer(req, res, next) {
       phone,
       whatsappNumber: whatsappNumber || phone,
       address,
+      profilePhoto: req.body.profilePhoto || '',
     });
 
     return ok(res, { customer }, 'Customer created', 201);
@@ -140,12 +143,13 @@ async function updateCustomer(req, res, next) {
     const existing = await Customer.findOne({ _id: req.params.id, merchantId: req.merchantId });
     if (!existing) return fail(res, 'Customer not found.', 404);
 
-    let { name, phone, whatsappNumber, address } = req.body;
+    let { name, phone, whatsappNumber, address, profilePhoto } = req.body;
 
     if (name === undefined) name = existing.name;
     if (phone === undefined) phone = existing.phone;
     if (whatsappNumber === undefined) whatsappNumber = existing.whatsappNumber;
     if (address === undefined) address = existing.address;
+    if (profilePhoto === undefined) profilePhoto = existing.profilePhoto;
 
     if (!name) return fail(res, 'Customer name is required.', 400);
 
@@ -162,12 +166,38 @@ async function updateCustomer(req, res, next) {
       whatsappNumber = whatsappNumber || '';
     }
 
+    // Clean up old profile photo if it changed or was removed
+    if (profilePhoto !== undefined && existing.profilePhoto && existing.profilePhoto !== profilePhoto) {
+      const oldPath = path.join(__dirname, '..', '..', existing.profilePhoto);
+      if (fs.existsSync(oldPath)) {
+        try {
+          fs.unlinkSync(oldPath);
+        } catch (e) {
+          console.error('Failed to delete old profile photo:', e.message);
+        }
+      }
+    }
+
     const customer = await Customer.findOneAndUpdate(
       { _id: req.params.id, merchantId: req.merchantId },
-      { $set: { name, phone, whatsappNumber, address } },
+      { $set: { name, phone, whatsappNumber, address, profilePhoto } },
       { new: true, runValidators: true }
     );
     return ok(res, { customer }, 'Customer updated');
+  } catch (err) {
+    next(err);
+  }
+}
+
+/** POST /api/customers/upload-photo */
+async function uploadCustomerPhoto(req, res, next) {
+  try {
+    if (!req.file) {
+      return fail(res, 'No image file uploaded.', 400);
+    }
+
+    const relativePath = `/uploads/profiles/${req.file.filename}`;
+    return ok(res, { profilePhoto: relativePath }, 'Customer photo uploaded successfully');
   } catch (err) {
     next(err);
   }
@@ -188,4 +218,4 @@ async function deleteCustomer(req, res, next) {
   }
 }
 
-module.exports = { listCustomers, createCustomer, getCustomer, updateCustomer, deleteCustomer };
+module.exports = { listCustomers, createCustomer, getCustomer, updateCustomer, deleteCustomer, uploadCustomerPhoto };
