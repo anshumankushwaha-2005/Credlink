@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, ChevronRight, X, Phone, User, MapPin, Camera, Upload } from 'lucide-react';
+import { Plus, Search, ChevronRight, X, Phone, User, MapPin, Camera, Upload, Trash2, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Layout from '../components/layout/Layout.jsx';
-import { listCustomers, createCustomer, uploadCustomerPhoto } from '../services/customerService';
+import { listCustomers, createCustomer, uploadCustomerPhoto, deleteCustomer } from '../services/customerService';
 import { formatCurrency } from '../utils/formatCurrency';
 import Card from '../components/common/Card.jsx';
 import Button from '../components/common/Button.jsx';
@@ -100,7 +100,15 @@ const localCustomerTranslations = {
     successMsg: "Customer added successfully! 🎉",
     failedMsg: "Failed to add customer",
     uploadPhoto: "Upload Photo",
-    removePhoto: "Remove"
+    removePhoto: "Remove",
+    deleteCustomer: "Delete Customer",
+    deleteConfirmTitle: "Delete Customer?",
+    deleteConfirmMsg: "Are you sure you want to delete",
+    deleteConfirmNote: "All transactions linked to this customer will be hidden.",
+    deleteBtn: "Yes, Delete",
+    cancelBtn: "Cancel",
+    deleteSuccess: "Customer deleted successfully!",
+    deleteFailed: "Failed to delete customer"
   },
   hi: {
     shopCustomers: "ग्राहक सूची",
@@ -127,7 +135,15 @@ const localCustomerTranslations = {
     successMsg: "ग्राहक सफलतापूर्वक जोड़ दिया गया है! 🎉",
     failedMsg: "ग्राहक जोड़ने में विफल",
     uploadPhoto: "फ़ोटो अपलोड करें",
-    removePhoto: "हटाएं"
+    removePhoto: "हटाएं",
+    deleteCustomer: "ग्राहक हटाएं",
+    deleteConfirmTitle: "ग्राहक हटाएं?",
+    deleteConfirmMsg: "क्या आप वाकई इस ग्राहक को हटाना चाहते हैं",
+    deleteConfirmNote: "इस ग्राहक से जुड़े सभी लेनदेन छिपा दिए जाएंगे।",
+    deleteBtn: "हाँ, हटाएं",
+    cancelBtn: "रद्द करें",
+    deleteSuccess: "ग्राहक सफलतापूर्वक हटा दिया गया!",
+    deleteFailed: "ग्राहक हटाने में विफल"
   },
   hinglish: {
     shopCustomers: "Customers List",
@@ -154,7 +170,15 @@ const localCustomerTranslations = {
     successMsg: "Customer successfully add ho gaya! 🎉",
     failedMsg: "Customer add karne me fail ho gaye",
     uploadPhoto: "Photo Upload",
-    removePhoto: "Remove"
+    removePhoto: "Remove",
+    deleteCustomer: "Customer Delete Karein",
+    deleteConfirmTitle: "Customer Delete Karein?",
+    deleteConfirmMsg: "Kya aap sach mein is customer ko delete karna chahte hain",
+    deleteConfirmNote: "Is customer ke saare transactions chhupa diye jayenge.",
+    deleteBtn: "Haan, Delete Karein",
+    cancelBtn: "Cancel",
+    deleteSuccess: "Customer successfully delete ho gaya!",
+    deleteFailed: "Customer delete nahi ho paya"
   },
   mr: {
     shopCustomers: "ग्राहक",
@@ -181,7 +205,15 @@ const localCustomerTranslations = {
     successMsg: "ग्राहक यशस्वीरित्या जोडला गेला! 🎉",
     failedMsg: "ग्राहक जोडण्यात अयशस्वी",
     uploadPhoto: "फोटो अपलोड करा",
-    removePhoto: "काढून टाका"
+    removePhoto: "काढून टाका",
+    deleteCustomer: "ग्राहक हटवा",
+    deleteConfirmTitle: "ग्राहक हटवायचा?",
+    deleteConfirmMsg: "तुम्हाला खात्री आहे का की तुम्ही या ग्राहकाला हटवू इच्छिता",
+    deleteConfirmNote: "या ग्राहकाशी संबंधित सर्व व्यवहार लपवले जातील.",
+    deleteBtn: "होय, हटवा",
+    cancelBtn: "रद्द करा",
+    deleteSuccess: "ग्राहक यशस्वीरित्या हटवला!",
+    deleteFailed: "ग्राहक हटवण्यात अयशस्वी"
   },
   gu: {
     shopCustomers: "ગ્રાહકો",
@@ -208,7 +240,15 @@ const localCustomerTranslations = {
     successMsg: "ગ્રાહક સફળતાપૂર્વક ઉમેરવામાં આવ્યો! 🎉",
     failedMsg: "ગ્રાહક ઉમેરવામાં નિષ્ફળ",
     uploadPhoto: "ફોટો અપલોડ કરો",
-    removePhoto: "દૂર કરો"
+    removePhoto: "દૂર કરો",
+    deleteCustomer: "ગ્રાહક કાઢી નાખો",
+    deleteConfirmTitle: "ગ્રાહક કાઢી નાખશો?",
+    deleteConfirmMsg: "શું તમે ખરેખર આ ગ્રાહકને કાઢી નાખવા માંગો છો",
+    deleteConfirmNote: "આ ગ્રાહક સાથે જોડાયેલા બધા વ્યવહારો છુપાવવામાં આવશે.",
+    deleteBtn: "હા, કાઢી નાખો",
+    cancelBtn: "રદ કરો",
+    deleteSuccess: "ગ્રાહક સફળતાપૂર્વક કાઢી નાખવામાં આવ્યો!",
+    deleteFailed: "ગ્રાહક કાઢી નાખવામાં નિષ્ફળ"
   },
   ta: {
     shopCustomers: "வாடிக்கையாளர்கள்",
@@ -235,7 +275,15 @@ const localCustomerTranslations = {
     successMsg: "வாடிக்கையாளர் வெற்றிகரமாக சேர்க்கப்பட்டார்! 🎉",
     failedMsg: "வாடிக்கையாளரைச் சேர்ப்பதில் தோல்வி",
     uploadPhoto: "புகைப்படத்தைப் பதிவேற்றவும்",
-    removePhoto: "நீக்கவும்"
+    removePhoto: "நீக்கவும்",
+    deleteCustomer: "வாடிக்கையாளரை நீக்கு",
+    deleteConfirmTitle: "வாடிக்கையாளரை நீக்கவா?",
+    deleteConfirmMsg: "இந்த வாடிக்கையாளரை நீக்க விரும்புகிறீர்களா",
+    deleteConfirmNote: "இந்த வாடிக்கையாளருடன் இணைக்கப்பட்ட அனைத்து பரிவர்த்தனைகளும் மறைக்கப்படும்.",
+    deleteBtn: "ஆம், நீக்கு",
+    cancelBtn: "ரத்து செய்",
+    deleteSuccess: "வாடிக்கையாளர் வெற்றிகரமாக நீக்கப்பட்டார்!",
+    deleteFailed: "வாடிக்கையாளரை நீக்குவதில் தோல்வி"
   },
   te: {
     shopCustomers: "కస్టమర్లు",
@@ -262,7 +310,15 @@ const localCustomerTranslations = {
     successMsg: "కస్టమర్ విజయవంతంగా జోడించబడ్డారు! 🎉",
     failedMsg: "కస్టమర్‌ను జోడించడంలో విఫలమైంది",
     uploadPhoto: "ఫోటోను అప్‌లోడ్ చేయండి",
-    removePhoto: "తొలగించండి"
+    removePhoto: "తొలగించండి",
+    deleteCustomer: "కస్టమర్‌ను తొలగించు",
+    deleteConfirmTitle: "కస్టమర్‌ను తొలగించాలా?",
+    deleteConfirmMsg: "మీరు ఈ కస్టమర్‌ను తొలగించాలనుకుంటున్నారా",
+    deleteConfirmNote: "ఈ కస్టమర్‌కు సంబంధించిన అన్ని లావాదేవీలు దాచబడతాయి.",
+    deleteBtn: "అవును, తొలగించు",
+    cancelBtn: "రద్దు చేయి",
+    deleteSuccess: "కస్టమర్ విజయవంతంగా తొలగించబడ్డారు!",
+    deleteFailed: "కస్టమర్‌ను తొలగించడంలో విఫలమైంది"
   },
   bn: {
     shopCustomers: "গ্রাহকগণ",
@@ -289,7 +345,15 @@ const localCustomerTranslations = {
     successMsg: "গ্রাহক সফলভাবে যোগ করা হয়েছে! 🎉",
     failedMsg: "গ্রাহক যোগ করতে ব্যর্থ",
     uploadPhoto: "ছবি আপলোড করুন",
-    removePhoto: "মুছে ফেলুন"
+    removePhoto: "মুছে ফেলুন",
+    deleteCustomer: "গ্রাহক মুছে ফেলুন",
+    deleteConfirmTitle: "গ্রাহক মুছে ফেলবেন?",
+    deleteConfirmMsg: "আপনি কি সত্যিই এই গ্রাহকটি মুছে ফেলতে চান",
+    deleteConfirmNote: "এই গ্রাহকের সাথে সম্পর্কিত সমস্ত লেনদেন লুকানো হবে।",
+    deleteBtn: "হ্যাঁ, মুছে ফেলুন",
+    cancelBtn: "বাতিল",
+    deleteSuccess: "গ্রাহক সফলভাবে মুছে ফেলা হয়েছে!",
+    deleteFailed: "গ্রাহক মুছে ফেলতে ব্যর্থ"
   },
   pa: {
     shopCustomers: "ਗਾਹਕ",
@@ -316,7 +380,15 @@ const localCustomerTranslations = {
     successMsg: "ਗਾਹਕ ਸਫਲਤਾਪੂਰਵਕ ਜੋੜਿਆ ਗਿਆ! 🎉",
     failedMsg: "ਗਾਹਕ ਜੋੜਨ ਵਿੱਚ ਅਸਫਲ",
     uploadPhoto: "ਫੋਟੋ ਅਪਲੋਡ ਕਰੋ",
-    removePhoto: "ਹਟਾਓ"
+    removePhoto: "ਹਟਾਓ",
+    deleteCustomer: "ਗਾਹਕ ਮਿਟਾਓ",
+    deleteConfirmTitle: "ਗਾਹਕ ਮਿਟਾਉਣਾ ਹੈ?",
+    deleteConfirmMsg: "ਕੀ ਤੁਸੀਂ ਸੱਚਮੁੱਚ ਇਸ ਗਾਹਕ ਨੂੰ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ",
+    deleteConfirmNote: "ਇਸ ਗਾਹਕ ਨਾਲ ਜੁੜੇ ਸਾਰੇ ਲੈਣ-ਦੇਣ ਲੁਕਾ ਦਿੱਤੇ ਜਾਣਗੇ।",
+    deleteBtn: "ਹਾਂ, ਮਿਟਾਓ",
+    cancelBtn: "ਰੱਦ ਕਰੋ",
+    deleteSuccess: "ਗਾਹਕ ਸਫਲਤਾਪੂਰਵਕ ਮਿਟਾ ਦਿੱਤਾ ਗਿਆ!",
+    deleteFailed: "ਗਾਹਕ ਮਿਟਾਉਣ ਵਿੱਚ ਅਸਫਲ"
   }
 };
 
@@ -343,6 +415,8 @@ export default function Customers() {
   const [form, setForm] = useState({ name: '', phone: '', address: '', profilePhoto: '' });
   const [saving, setSaving] = useState(false);
   const { language } = useTranslation();
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   
   const ct = (key) => {
     const dict = localCustomerTranslations[language] || localCustomerTranslations['en'];
@@ -425,6 +499,21 @@ export default function Customers() {
       speakMessage(voiceMsgs.error, language);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteCustomer(deleteTarget._id);
+      toast.success(ct('deleteSuccess'));
+      setDeleteTarget(null);
+      fetchCustomers(search);
+    } catch (err) {
+      toast.error(err.response?.data?.message || ct('deleteFailed'));
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -526,7 +615,14 @@ export default function Customers() {
                   </div>
  
                   {/* Actions footer */}
-                  <div className="mt-4 pt-3.5 border-t border-slate-50 flex justify-end">
+                  <div className="mt-4 pt-3.5 border-t border-slate-50 flex justify-between items-center">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget(c); }}
+                      className="p-2.5 rounded-xl text-slate-350 hover:text-rose-500 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all duration-200 active:scale-95"
+                      title={ct('deleteCustomer')}
+                    >
+                      <Trash2 size={15} />
+                    </button>
                     <Link 
                       to={`/customers/${c._id}`} 
                       className="btn-secondary !py-2.5 !px-4 text-xs font-bold hover:bg-blue-55/55 hover:text-blue-700 hover:border-blue-100/50 flex items-center gap-1"
@@ -628,6 +724,43 @@ export default function Customers() {
             {ct('saveCustomerBtn')}
           </Button>
         </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title={ct('deleteConfirmTitle')}
+        icon={AlertTriangle}
+      >
+        <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-100">
+            <p className="text-sm text-slate-700">
+              {ct('deleteConfirmMsg')} <span className="font-bold text-slate-900">{deleteTarget?.name}</span>?
+            </p>
+            <p className="text-xs text-slate-400 mt-2">{ct('deleteConfirmNote')}</p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="flex-1 py-3 px-4 text-sm font-bold text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all duration-200 active:scale-[0.98]"
+            >
+              {ct('cancelBtn')}
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex-1 py-3 px-4 text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-2xl transition-all duration-200 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 shadow-md shadow-rose-500/20"
+            >
+              {deleting ? (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Trash2 size={15} />
+              )}
+              {ct('deleteBtn')}
+            </button>
+          </div>
+        </div>
       </Modal>
     </Layout>
   );
