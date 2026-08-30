@@ -11,11 +11,16 @@ import Button from '../components/common/Button.jsx';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
   const { language, setLanguage, t } = useTranslation();
   const navigate = useNavigate();
 
+  // Show warning when user has typed something and it's not valid
+  const showEmailWarning = emailTouched && email.trim().length > 0 && !isValidEmail(email);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setEmailTouched(true);
     if (!isValidEmail(email)) {
       toast.error('Please enter a valid email address');
       return;
@@ -75,16 +80,28 @@ export default function Login() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Email Address"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="merchant@email.com"
-                icon={Mail}
-                autoFocus
-                required
-              />
+              <div>
+                <Input
+                  label="Email Address"
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); if (!emailTouched) setEmailTouched(true); }}
+                  onBlur={() => setEmailTouched(true)}
+                  placeholder="merchant@email.com"
+                  icon={Mail}
+                  autoFocus
+                  required
+                />
+                {/* Inline email validation warning */}
+                {showEmailWarning && (
+                  <div className="flex items-center gap-1.5 mt-1.5 px-1 animate-slide-up">
+                    <span className="text-red-500 text-xs">⚠️</span>
+                    <p className="text-[11px] text-red-500 font-semibold leading-snug">
+                      Please enter a valid email — wrong ya fake email par OTP nahi jayegi!
+                    </p>
+                  </div>
+                )}
+              </div>
 
               <Button 
                 type="submit" 
