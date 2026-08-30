@@ -96,6 +96,14 @@ export default function Login() {
               </Button>
             </form>
 
+            {/* Instruction: Valid Gmail required */}
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+              <span className="text-amber-500 text-sm mt-0.5">⚠️</span>
+              <p className="text-[11px] text-amber-700 font-medium leading-relaxed">
+                <strong>Important:</strong> Please enter a valid Gmail address (e.g. yourname@gmail.com). OTP will only be sent to a real, active email. Incorrect or fake emails will <strong>not</strong> receive any OTP.
+              </p>
+            </div>
+
             <p className="text-[11px] text-slate-400 text-center leading-relaxed">
               We'll send a secure OTP to your email.<br />No password needed. Keep your account clean.
             </p>
